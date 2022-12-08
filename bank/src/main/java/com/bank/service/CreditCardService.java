@@ -1,6 +1,5 @@
 package com.bank.service;
 
-import com.bank.dto.CreditCardInfoDto;
 import com.bank.model.CreditCard;
 import com.bank.repository.CreditCardRepository;
 import org.springframework.stereotype.Service;

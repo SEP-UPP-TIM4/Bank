@@ -1,7 +1,5 @@
 package com.bank.service;
 
-import com.bank.dto.ValidateRequestDto;
-import com.bank.dto.ValidateResponseDto;
 import com.bank.exception.AccountNotFoundException;
 import com.bank.exception.NotEnoughFundsException;
 import com.bank.model.Account;

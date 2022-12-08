@@ -1,6 +1,5 @@
 package com.bank.service;
 
-import com.bank.dto.ValidateRequestDto;
 import com.bank.model.Currency;
 import com.bank.model.Transaction;
 import com.bank.repository.TransactionRepository;
