@@ -16,6 +16,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Object> handleNotFoundException(NotFoundException exception) {
+        ExceptionResponse response = getExceptionResponse(exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NotEnoughFundsException.class)
+    public ResponseEntity<Object> handleNotEnoughFundsException(NotEnoughFundsException exception) {
+        ExceptionResponse response = getExceptionResponse(exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     private ExceptionResponse getExceptionResponse(String message) {
         ExceptionResponse response = new ExceptionResponse();
         response.setDateTime(LocalDateTime.now());

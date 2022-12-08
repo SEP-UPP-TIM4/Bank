@@ -1,10 +1,11 @@
 package com.bank.service;
 
-import com.bank.dto.PaymentRequestDto;
-import com.bank.dto.PaymentResponseDto;
+import com.bank.dto.ValidateRequestDto;
+import com.bank.dto.ValidateResponseDto;
 import com.bank.exception.AccountNotFoundException;
+import com.bank.exception.NotEnoughFundsException;
 import com.bank.model.Account;
-import com.bank.model.Transaction;
+import com.bank.model.Payment;
 import com.bank.repository.AccountRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,25 +20,24 @@ public class AccountService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final TransactionService transactionService;
-
-    private final String PAYMENT_URL = "localhost:4201/payment";
-
-    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, TransactionService transactionService) {
+    public AccountService(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
-        this.transactionService = transactionService;
     }
 
-    public PaymentResponseDto getPaymentUrlAndId(PaymentRequestDto requestDto) throws AccountNotFoundException {
-        validateAccount(requestDto.getMerchantId(), requestDto.getMerchantPassword());
-        Transaction newTransaction = transactionService.createNewTransaction(requestDto);
-        return new PaymentResponseDto(PAYMENT_URL, newTransaction.getId());
-    }
-
-    private void validateAccount(UUID merchantId, String merchantPassword) throws AccountNotFoundException {
+    public void validateAccount(UUID merchantId, String merchantPassword) throws AccountNotFoundException {
         Optional<Account> account = accountRepository.findById(merchantId);
         if(account.isEmpty() || !passwordEncoder.matches(merchantPassword,account.get().getPassword()))
             throw new AccountNotFoundException(merchantId.toString());
+    }
+
+    public Account pay(Account account, Payment payment){
+        int compareResult = account.getAmount().compareTo(payment.getTransaction().getAmount());
+        if(compareResult == -1){
+            throw new NotEnoughFundsException();
+        }
+        account.setAmount(account.getAmount().subtract(payment.getTransaction().getAmount()));
+        account.setReservedAmount(account.getReservedAmount().add(payment.getTransaction().getAmount()));
+        return accountRepository.save(account);
     }
 }

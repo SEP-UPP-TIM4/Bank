@@ -33,11 +33,6 @@ public class Account {
     @Setter
     private String address;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
-    @Setter
-    private Set<CreditCard> creditCards = new HashSet<>();
-
     @Setter
     private BigDecimal amount;
 

@@ -18,7 +18,7 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;             //acquirer/issuer(ako je banka kupca) order id
 
     @Setter
     @Nullable
@@ -40,15 +40,6 @@ public class Transaction {
     @Setter
     @Builder.Default
     private boolean processed = false;
-
-    @Setter
-    private String successUrl;
-
-    @Setter
-    private String failedUrl;
-
-    @Setter
-    private String errorUrl;
 
     @PrePersist
     protected void onCreate() {

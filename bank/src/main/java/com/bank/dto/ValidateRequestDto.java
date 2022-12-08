@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class PaymentRequestDto {
+public class ValidateRequestDto {
 
     private UUID merchantId;
 
@@ -21,7 +21,7 @@ public class PaymentRequestDto {
 
     private String currency;
 
-    private UUID merchantOrderId;
+    private Long merchantOrderId;
 
     private LocalDateTime merchantTimestamp;
 

@@ -1,10 +1,13 @@
 package com.bank.service;
 
-import com.bank.dto.PaymentRequestDto;
+import com.bank.dto.ValidateRequestDto;
 import com.bank.model.Currency;
 import com.bank.model.Transaction;
 import com.bank.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 public class TransactionService {
@@ -15,10 +18,9 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    public Transaction createNewTransaction(PaymentRequestDto requestDto) {
-        Transaction transaction = Transaction.builder().acquirerId(requestDto.getMerchantId()).amount(requestDto.getAmount())
-                .currency(Enum.valueOf(Currency.class, requestDto.getCurrency()))
-                .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl()).errorUrl(requestDto.getErrorUrl()).build();
+    public Transaction createNewTransaction(UUID acquirerId, BigDecimal amount, String currency) {
+        Transaction transaction = Transaction.builder().acquirerId(acquirerId).amount(amount)
+                .currency(Enum.valueOf(Currency.class, currency)).build();
         return transactionRepository.save(transaction);
     }
 }

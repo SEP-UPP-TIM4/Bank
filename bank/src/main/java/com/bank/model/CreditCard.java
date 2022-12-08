@@ -1,9 +1,6 @@
 package com.bank.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -28,5 +25,10 @@ public class CreditCard {
     private String cvv;
 
     @Setter
-    private LocalDate expirationDate;   //mjesec i godina
+    private LocalDate expirationDate;   //mjesec i
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
 }
