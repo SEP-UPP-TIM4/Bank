@@ -16,13 +16,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreditCard {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
+
     @Setter
     private String pan;
+
     @Setter
     private String cvv;
+
     @Setter
-    private LocalDate expirationDate;//mjesec i godina
+    private LocalDate expirationDate;   //mjesec i godina
 }

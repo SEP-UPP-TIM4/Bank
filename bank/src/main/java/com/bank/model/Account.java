@@ -3,33 +3,45 @@ package com.bank.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@Table(name = "accounts")
 @Getter
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
+
     @Setter
     private String password;
+
     @Setter
     private String number;
+
     @Setter
     private String name;
+
     @Setter
     private String address;
+
     @OneToMany
-    private Set<CreditCard> creditCards;
+    private Set<CreditCard> creditCards = new HashSet<>();
+
     @Setter
-    private double amount;
+    private BigDecimal amount;
+
     @Setter
-    private double reservedAmount;
+    private BigDecimal reservedAmount;
+
     @Setter
     private Currency currency;
 }

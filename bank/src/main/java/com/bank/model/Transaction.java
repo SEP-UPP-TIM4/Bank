@@ -1,11 +1,10 @@
 package com.bank.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,17 +15,43 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    private Long id;
+
     @Setter
-    private String issuerAcountNumber;
+    @Nullable
+    private UUID issuerId;
+
     @Setter
-    private String acquirerAccountNumber;
+    private UUID acquirerId;
+
     @Setter
-    private double amount;
+    private BigDecimal amount;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
+
     @Setter
     private LocalDateTime timeStamp;
+
     @Setter
-    private Currency currency;
+    @Builder.Default
+    private boolean processed = false;
+
+    @Setter
+    private String successUrl;
+
+    @Setter
+    private String failedUrl;
+
+    @Setter
+    private String errorUrl;
+
+    @PrePersist
+    protected void onCreate() {
+        timeStamp = LocalDateTime.now();
+    }
 }
