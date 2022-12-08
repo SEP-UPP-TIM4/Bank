@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<Object> handleNameAlreadyExistsException(AccountNotFoundException exception) {
         ExceptionResponse response = getExceptionResponse(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     private ExceptionResponse getExceptionResponse(String message) {

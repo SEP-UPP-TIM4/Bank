@@ -2,13 +2,13 @@ package com.bank.service;
 
 import com.bank.dto.PaymentRequestDto;
 import com.bank.dto.PaymentResponseDto;
+import com.bank.exception.AccountNotFoundException;
 import com.bank.model.Account;
 import com.bank.model.Transaction;
 import com.bank.repository.AccountRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.util.Optional;
 import java.util.UUID;
 

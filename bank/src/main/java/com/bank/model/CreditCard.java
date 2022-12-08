@@ -18,7 +18,7 @@ import java.util.UUID;
 public class CreditCard {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     @Setter

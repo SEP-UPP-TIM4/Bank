@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     @Setter
@@ -33,7 +33,9 @@ public class Account {
     @Setter
     private String address;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    @Setter
     private Set<CreditCard> creditCards = new HashSet<>();
 
     @Setter
