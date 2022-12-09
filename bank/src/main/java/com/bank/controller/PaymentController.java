@@ -25,11 +25,13 @@ public class PaymentController {
         return paymentService.getPaymentUrlAndId(requestDto);
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/credit-card")
     @ResponseStatus(value = HttpStatus.OK)
     public PaymentResponseDto payByCreditCard(@RequestBody CreditCardInfoDto requestDto) {
-        //pronaci payment id iz jwt
-        Long paymentId = Long.valueOf(1);
+        //TODO: pronaci payment id iz jwt ili putanje
+        Long paymentId = 1L;
+        // TODO: vratiti PSP-u ove podatke, a kupca redirektovati na successUrl/failedUrl/errorUrl
         return PaymentMapper.PaymentToPaymentResponseDto(paymentService.payByCreditCard(requestDto, paymentId));
     }
 }

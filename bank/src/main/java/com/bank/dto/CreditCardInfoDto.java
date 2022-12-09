@@ -12,6 +12,6 @@ import java.time.LocalDate;
 public class CreditCardInfoDto {
     private String pan;
     private String cvv;
-    private String cardHolderName;
+    private String cardholderName;
     private LocalDate expirationDate;
 }

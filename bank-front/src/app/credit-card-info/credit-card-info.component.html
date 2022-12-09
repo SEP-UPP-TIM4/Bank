@@ -1,59 +1,61 @@
 <div>
     <mat-grid-list cols="1" cols="1" rowHeight="100px">
-        <mat-grid-tile><h1>Credit card information</h1></mat-grid-tile>
         <mat-grid-tile>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>First 4 Digits</mat-label>
-                <input matInput>
-            </mat-form-field>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>Second 4 Digits</mat-label>
-                <input matInput>
-            </mat-form-field>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>Third 4 Digits</mat-label>
-                <input matInput>
-            </mat-form-field>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>Last 4 Digits</mat-label>
-                <input matInput>
-            </mat-form-field>
+            <h1>Credit card information</h1>
         </mat-grid-tile>
+        <form [formGroup]="creditCardInfoForm">
+            <mat-grid-tile>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>First 4 Digits</mat-label>
+                    <input matInput formControlName="firstFourDigits">
+                </mat-form-field>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>Second 4 Digits</mat-label>
+                    <input matInput formControlName="secondFourDigits">
+                </mat-form-field>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>Third 4 Digits</mat-label>
+                    <input matInput formControlName="thirdFourDigits">
+                </mat-form-field>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>Last 4 Digits</mat-label>
+                    <input matInput formControlName="lastFourDigits">
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="cardholderName">
+                </mat-form-field>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>Expiration Month</mat-label>
+                    <mat-select formControlName="expirationMonth">
+                        <mat-option value="01">01</mat-option>
+                        <mat-option value="02">02</mat-option>
+                        <mat-option value="03">03</mat-option>
+                        <mat-option value="04">04</mat-option>
+                        <mat-option value="05">05</mat-option>
+                        <mat-option value="06">06</mat-option>
+                        <mat-option value="07">07</mat-option>
+                        <mat-option value="08">08</mat-option>
+                        <mat-option value="09">09</mat-option>
+                        <mat-option value="10">10</mat-option>
+                        <mat-option value="11">11</mat-option>
+                        <mat-option value="12">12</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>Expiration Month</mat-label>
+                    <input matInput formControlName="expirationYear">
+                </mat-form-field>
+                <mat-form-field style="margin-left: 3rem;" appearance="fill">
+                    <mat-label>CVC</mat-label>
+                    <input matInput formControlName="cvc">
+                </mat-form-field>
+            </mat-grid-tile>
+        </form>
         <mat-grid-tile>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>Name</mat-label>
-                <input matInput>
-            </mat-form-field>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>Expiration Month</mat-label>
-                <mat-select>
-                    <mat-option value="01">01</mat-option>
-                    <mat-option value="02">02</mat-option>
-                    <mat-option value="03">03</mat-option>
-                    <mat-option value="04">04</mat-option>
-                    <mat-option value="05">05</mat-option>
-                    <mat-option value="06">06</mat-option>
-                    <mat-option value="07">07</mat-option>
-                    <mat-option value="08">08</mat-option>
-                    <mat-option value="09">09</mat-option>
-                    <mat-option value="10">10</mat-option>
-                    <mat-option value="11">11</mat-option>
-                    <mat-option value="12">12</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>Expiration Month</mat-label>
-                <input matInput>
-            </mat-form-field>
-            <mat-form-field style="margin-left: 3rem;" appearance="fill">
-                <mat-label>CVC</mat-label>
-                <input matInput>
-            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="submit()">Submit</button>
         </mat-grid-tile>
-        <mat-grid-tile>
-            <button mat-raised-button color="primary">Submit</button>
-        </mat-grid-tile>
-      </mat-grid-list>
+    </mat-grid-list>
 </div>
-
-
