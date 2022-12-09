@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { CreditCardInfoDTO } from 'src/dto/CreditCardInfoDTO';
+import { CreditCardInfoDTO } from 'src/app/dto/CreditCardInfoDTO';
 import { CreditCardInfoService } from 'src/service/credit-card-info.service';
 
 @Component({
@@ -55,11 +55,8 @@ export class CreditCardInfoComponent implements OnInit {
     })
 
     this.creditCardService.send(creditCardInfoDto).subscribe((data: any) => {
-      alert(data.merchantOrderId + " " + data.acquirerOrderId 
-      + " " + data.acquirerTimestamp + " " + data.paymentId 
-      + " " + data.successfullyCompleted + " " + data.successfullyCompleted 
-      + " " + data.transactionAmount)
-    }, (err) => {
+      window.location.href = data.redirect
+    }, (err: any) => {
       alert(err);
     })
 

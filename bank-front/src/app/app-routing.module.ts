@@ -3,7 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { CreditCardInfoComponent } from './credit-card-info/credit-card-info.component';
 
 const routes: Routes = [
-  { path: '', component: CreditCardInfoComponent}
+  { path: '', component: CreditCardInfoComponent},
+  { path: 'redirect/:id', component: CreditCardInfoComponent}
 ];
 
 @NgModule({

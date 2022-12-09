@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CreditCardInfoDTO } from 'src/dto/CreditCardInfoDTO';
+import { CreditCardInfoDTO } from 'src/app/dto/CreditCardInfoDTO';
 import { config } from "src/shared"
 
 @Injectable({

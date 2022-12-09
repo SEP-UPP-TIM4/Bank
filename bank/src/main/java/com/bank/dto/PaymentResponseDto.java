@@ -16,10 +16,15 @@ import lombok.Setter;
 public class PaymentResponseDto {
 
     private Long merchantOrderId;
+
     private Long acquirerOrderId;
+
     private LocalDateTime acquirerTimestamp;
+
     private Long paymentId;
+
     private boolean successfullyCompleted;
+
     private BigDecimal transactionAmount;
 
 }

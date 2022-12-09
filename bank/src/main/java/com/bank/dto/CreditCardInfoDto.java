@@ -10,8 +10,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 public class CreditCardInfoDto {
+
     private String pan;
+
     private String cvv;
+
     private String cardholderName;
+
     private LocalDate expirationDate;
+
 }
