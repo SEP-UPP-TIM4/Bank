@@ -1,8 +1,9 @@
 package com.bank.controller;
 
 import com.bank.dto.*;
-import com.bank.mapper.PaymentMapper;
+import com.bank.model.Payment;
 import com.bank.service.PaymentService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,14 +24,11 @@ public class PaymentController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping("/credit-card")
+    @PostMapping("/credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RedirectDto payByCreditCard(@RequestBody CreditCardInfoDto requestDto) {
-        //TODO: pronaci payment id iz jwt ili putanje
-        Long paymentId = 1L;
-        // TODO: vratiti PSP-u ove podatke, a kupca redirektovati na successUrl/failedUrl/errorUrl
-        //return PaymentMapper.PaymentToPaymentResponseDto(paymentService.payByCreditCard(requestDto, paymentId));
-        paymentService.payByCreditCard(requestDto, paymentId);
-        return new RedirectDto("http://localhost:4200/redirect/1");
+    public RedirectDto payByCreditCard(@PathVariable Long paymentId, @RequestBody @Valid CreditCardInfoDto requestDto) {
+        Payment payment = paymentService.payByCreditCard(requestDto, paymentId);
+        // TODO: Convert Payment to PaymentResponseDto and send to PSP
+        return new RedirectDto(payment.getSuccessUrl());
     }
 }

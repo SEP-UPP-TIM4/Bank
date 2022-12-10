@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { CreditCardInfoDTO } from 'src/app/dto/CreditCardInfoDTO';
 import { CreditCardInfoService } from 'src/service/credit-card-info.service';
+import { ActivatedRoute } from '@angular/router'
 
 @Component({
   selector: 'app-credit-card-info',
@@ -10,7 +11,7 @@ import { CreditCardInfoService } from 'src/service/credit-card-info.service';
 })
 export class CreditCardInfoComponent implements OnInit {
 
-  constructor(private creditCardService: CreditCardInfoService) { }
+  constructor(private creditCardService: CreditCardInfoService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
   }
@@ -54,7 +55,8 @@ export class CreditCardInfoComponent implements OnInit {
       expirationDate
     })
 
-    this.creditCardService.send(creditCardInfoDto).subscribe((data: any) => {
+    const paymentId = this.route.snapshot.paramMap.get('id');
+    this.creditCardService.send(creditCardInfoDto, paymentId).subscribe((data: any) => {
       window.location.href = data.redirect
     }, (err: any) => {
       alert(err);

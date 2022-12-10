@@ -1,5 +1,6 @@
 package com.bank.exception;
 
+import com.bank.dto.RedirectDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,12 +11,6 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<Object> handleNameAlreadyExistsException(AccountNotFoundException exception) {
-        ExceptionResponse response = getExceptionResponse(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFoundException(NotFoundException exception) {
         ExceptionResponse response = getExceptionResponse(exception.getMessage());
@@ -23,9 +18,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotEnoughFundsException.class)
-    public ResponseEntity<Object> handleNotEnoughFundsException(NotEnoughFundsException exception) {
-        ExceptionResponse response = getExceptionResponse(exception.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<RedirectDto> handleNotEnoughFundsException(NotEnoughFundsException exception) {
+        return new ResponseEntity<>(new RedirectDto(exception.getMessage()), HttpStatus.OK);
+    }
+
+    @ExceptionHandler(ErrorInCommunicationException.class)
+    public ResponseEntity<RedirectDto> handleNotEnoughFundsException(ErrorInCommunicationException exception) {
+        return new ResponseEntity<>(new RedirectDto(exception.getMessage()), HttpStatus.OK);
     }
 
     private ExceptionResponse getExceptionResponse(String message) {

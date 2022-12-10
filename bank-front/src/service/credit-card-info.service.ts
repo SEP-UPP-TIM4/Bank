@@ -12,7 +12,7 @@ export class CreditCardInfoService {
 
   constructor(private http: HttpClient) { }
 
-  send(creditCardInfoDto: CreditCardInfoDTO) {
-    return this.http.post(`${config.baseUrl}${this.url}`, creditCardInfoDto)
+  send(creditCardInfoDto: CreditCardInfoDTO, paymentId: any ) {
+    return this.http.post(`${config.baseUrl}${this.url}/${paymentId}`, creditCardInfoDto)
   }
 }

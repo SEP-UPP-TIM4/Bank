@@ -3,7 +3,7 @@ package com.bank.service;
 import com.bank.dto.CreditCardInfoDto;
 import com.bank.dto.ValidateRequestDto;
 import com.bank.dto.ValidateResponseDto;
-import com.bank.exception.AccountNotFoundException;
+import com.bank.exception.ErrorInCommunicationException;
 import com.bank.exception.NotFoundException;
 import com.bank.model.Account;
 import com.bank.model.CreditCard;
@@ -28,12 +28,6 @@ public class PaymentService {
         this.creditCardService = creditCardService;
     }
 
-    public Payment findById(Long id){
-        Optional<Payment> paymentInfo = paymentRepository.findById(id);
-        if(paymentInfo.isEmpty()) throw new NotFoundException(Payment.class.getSimpleName());
-        return paymentInfo.get();
-    }
-
     public Payment createPaymentInfo(ValidateRequestDto requestDto) {
         Payment payment = Payment.builder().merchantOrderId(requestDto.getMerchantOrderId())
                 .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl()).errorUrl(requestDto.getErrorUrl())
@@ -42,25 +36,40 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
 
-    public ValidateResponseDto getPaymentUrlAndId(ValidateRequestDto requestDto) throws AccountNotFoundException {
+    public ValidateResponseDto getPaymentUrlAndId(ValidateRequestDto requestDto) {
         accountService.validateAccount(requestDto.getMerchantId(), requestDto.getMerchantPassword());
         Payment newPayment = createPaymentInfo(requestDto);
         return new ValidateResponseDto(PAYMENT_URL, newPayment.getId());
     }
 
     public Payment payByCreditCard(CreditCardInfoDto creditCardInfoDto, Long paymentId){
-        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new NotFoundException(Payment.class.getSimpleName()));;
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new NotFoundException(Payment.class.getSimpleName()));
         Optional<CreditCard> creditCard = creditCardService.getCreditCard(creditCardInfoDto.getPan());
-        Account account;
-        if(creditCard.isEmpty()){
-            //pozovi pcc
-            account = null;//vratice druga banka
-        }else{
-            account = accountService.pay(creditCard.get().getAccount(), payment);
-        }
+        Account account = processPayment(creditCard, payment);
         payment.getTransaction().setProcessed(true);
         payment.getTransaction().setIssuerId(account.getId());
         return paymentRepository.save(payment);
+    }
+
+    private Account processPayment(Optional<CreditCard> creditCard, Payment payment) {
+        if(creditCard.isPresent()){
+            return accountService.pay(creditCard.get().getAccount(), payment);
+        } else {
+           return callPcp(payment);
+        }
+    }
+
+    private Account callPcp(Payment payment) {
+        try {
+            // TODO: make rest call PCP to get account from other bank
+            return makeRestCall(payment);
+        } catch (Exception ex) {
+            throw new ErrorInCommunicationException(payment.getErrorUrl());
+        }
+    }
+
+    private Account makeRestCall(Payment payment) {
+        return new Account();
     }
 
 

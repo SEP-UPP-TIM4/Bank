@@ -25,7 +25,7 @@ public class CreditCard {
     private String cvv;
 
     @Setter
-    private LocalDate expirationDate;   //mjesec i
+    private LocalDate expirationDate;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
