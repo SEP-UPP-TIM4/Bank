@@ -6,11 +6,10 @@ import com.bank.model.Payment;
 public class PaymentMapper{
 
     public static PaymentResponseDto PaymentToPaymentResponseDto(Payment payment){
-        PaymentResponseDto paymentResponseDto = new PaymentResponseDto(
-                payment.getMerchantOrderId(), payment.getTransaction().getId(), payment.getTransaction().getTimeStamp(),
-                payment.getId(), payment.getTransaction().isProcessed(), payment.getTransaction().getAmount());
 
-        return paymentResponseDto;
+        return new PaymentResponseDto(
+                payment.getMerchantOrderId(), payment.getTransaction().getId(), payment.getTransaction().getTimeStamp(),
+                payment.getId(), payment.getTransaction().getStatus().toString(), payment.getTransaction().getAmount());
     }
 
 }

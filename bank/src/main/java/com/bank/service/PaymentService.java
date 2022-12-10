@@ -21,33 +21,35 @@ public class PaymentService {
     private final CreditCardService creditCardService;
     private final String PAYMENT_URL = "localhost:4201/payment";
 
-    public PaymentService(TransactionService transactionService, PaymentRepository paymentRepository, AccountService accountService, CreditCardService creditCardService) {
+    public PaymentService(TransactionService transactionService, PaymentRepository paymentRepository,
+                          AccountService accountService, CreditCardService creditCardService) {
         this.transactionService = transactionService;
         this.paymentRepository = paymentRepository;
         this.accountService = accountService;
         this.creditCardService = creditCardService;
     }
 
-    public Payment createPaymentInfo(ValidateRequestDto requestDto) {
-        Payment payment = Payment.builder().merchantOrderId(requestDto.getMerchantOrderId())
-                .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl()).errorUrl(requestDto.getErrorUrl())
-                .transaction(transactionService.createNewTransaction(requestDto.getMerchantId(), requestDto.getAmount(), requestDto.getCurrency()))
-                .build();
-        return paymentRepository.save(payment);
-    }
-
     public ValidateResponseDto getPaymentUrlAndId(ValidateRequestDto requestDto) {
         accountService.validateAccount(requestDto.getMerchantId(), requestDto.getMerchantPassword());
-        Payment newPayment = createPaymentInfo(requestDto);
+        Payment newPayment = createPayment(requestDto);
         return new ValidateResponseDto(PAYMENT_URL, newPayment.getId());
+    }
+
+    public Payment createPayment(ValidateRequestDto requestDto) {
+        Payment payment = Payment.builder().merchantOrderId(requestDto.getMerchantOrderId())
+                .merchantTimestamp(requestDto.getMerchantTimestamp())
+                .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl()).errorUrl(requestDto.getErrorUrl())
+                .transaction(transactionService.createNewTransaction(accountService.getById(requestDto.getMerchantId()),
+                        requestDto.getAmount(), requestDto.getCurrency()))
+                .build();
+        return paymentRepository.save(payment);
     }
 
     public Payment payByCreditCard(CreditCardInfoDto creditCardInfoDto, Long paymentId){
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new NotFoundException(Payment.class.getSimpleName()));
         Optional<CreditCard> creditCard = creditCardService.getCreditCard(creditCardInfoDto.getPan());
         Account account = processPayment(creditCard, payment);
-        payment.getTransaction().setProcessed(true);
-        payment.getTransaction().setIssuerId(account.getId());
+        payment.getTransaction().setIssuer(account);
         return paymentRepository.save(payment);
     }
 
@@ -61,7 +63,7 @@ public class PaymentService {
 
     private Account callPcp(Payment payment) {
         try {
-            // TODO: make rest call PCP to get account from other bank
+            // TODO: make rest call to PCC to get account from other bank
             return makeRestCall(payment);
         } catch (Exception ex) {
             throw new ErrorInCommunicationException(payment.getErrorUrl());

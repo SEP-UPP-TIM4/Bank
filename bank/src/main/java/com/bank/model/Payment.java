@@ -3,6 +3,8 @@ package com.bank.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
@@ -15,6 +17,8 @@ public class Payment {
     private Long id;                                    //payment id
 
     private Long merchantOrderId;
+
+    private LocalDateTime merchantTimestamp;
 
     @Setter
     private String successUrl;

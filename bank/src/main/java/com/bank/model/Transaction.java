@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -22,10 +21,14 @@ public class Transaction {
 
     @Setter
     @Nullable
-    private UUID issuerId;
+    @ManyToOne
+    @JoinColumn
+    private Account issuer;
 
     @Setter
-    private UUID acquirerId;
+    @ManyToOne
+    @JoinColumn
+    private Account acquirer;
 
     @Setter
     private BigDecimal amount;
@@ -39,7 +42,8 @@ public class Transaction {
 
     @Setter
     @Builder.Default
-    private boolean processed = false;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status = TransactionStatus.PENDING;
 
     @PrePersist
     protected void onCreate() {

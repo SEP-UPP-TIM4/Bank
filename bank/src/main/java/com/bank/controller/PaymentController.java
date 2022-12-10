@@ -3,7 +3,6 @@ package com.bank.controller;
 import com.bank.dto.*;
 import com.bank.model.Payment;
 import com.bank.service.PaymentService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,7 @@ public class PaymentController {
     @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RedirectDto payByCreditCard(@PathVariable Long paymentId, @RequestBody @Valid CreditCardInfoDto requestDto) {
+    public RedirectDto payByCreditCard(@PathVariable Long paymentId, @RequestBody CreditCardInfoDto requestDto) {
         Payment payment = paymentService.payByCreditCard(requestDto, paymentId);
         // TODO: Convert Payment to PaymentResponseDto and send to PSP
         return new RedirectDto(payment.getSuccessUrl());

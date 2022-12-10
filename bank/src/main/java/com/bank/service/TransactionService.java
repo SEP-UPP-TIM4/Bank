@@ -1,12 +1,12 @@
 package com.bank.service;
 
+import com.bank.model.Account;
 import com.bank.model.Currency;
 import com.bank.model.Transaction;
 import com.bank.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class TransactionService {
@@ -17,9 +17,13 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    public Transaction createNewTransaction(UUID acquirerId, BigDecimal amount, String currency) {
-        Transaction transaction = Transaction.builder().acquirerId(acquirerId).amount(amount)
+    public Transaction createNewTransaction(Account acquirer, BigDecimal amount, String currency) {
+        Transaction transaction = Transaction.builder().acquirer(acquirer).amount(amount)
                 .currency(Enum.valueOf(Currency.class, currency)).build();
         return transactionRepository.save(transaction);
+    }
+
+    public void save(Transaction transaction) {
+        transactionRepository.save(transaction);
     }
 }

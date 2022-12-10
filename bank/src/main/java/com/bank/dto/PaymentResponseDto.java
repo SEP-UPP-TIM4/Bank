@@ -23,7 +23,7 @@ public class PaymentResponseDto {
 
     private Long paymentId;
 
-    private boolean successfullyCompleted;
+    private String transactionStatus;
 
     private BigDecimal transactionAmount;
 
