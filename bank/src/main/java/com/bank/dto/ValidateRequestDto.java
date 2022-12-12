@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 public class ValidateRequestDto {
 
-    private UUID merchantId;
+    private String merchantId;
 
     private String merchantPassword;
 

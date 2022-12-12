@@ -12,6 +12,7 @@ import com.bank.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PaymentService {
@@ -30,7 +31,7 @@ public class PaymentService {
     }
 
     public ValidateResponseDto getPaymentUrlAndId(ValidateRequestDto requestDto) {
-        accountService.validateAccount(requestDto.getMerchantId(), requestDto.getMerchantPassword());
+        accountService.validateAccount(UUID.fromString(requestDto.getMerchantId()), requestDto.getMerchantPassword());
         Payment newPayment = createPayment(requestDto);
         return new ValidateResponseDto(PAYMENT_URL, newPayment.getId());
     }
@@ -39,7 +40,7 @@ public class PaymentService {
         Payment payment = Payment.builder().merchantOrderId(requestDto.getMerchantOrderId())
                 .merchantTimestamp(requestDto.getMerchantTimestamp())
                 .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl()).errorUrl(requestDto.getErrorUrl())
-                .transaction(transactionService.createNewTransaction(accountService.getById(requestDto.getMerchantId()),
+                .transaction(transactionService.createNewTransaction(accountService.getById(UUID.fromString(requestDto.getMerchantId())),
                         requestDto.getAmount(), requestDto.getCurrency()))
                 .build();
         return paymentRepository.save(payment);
