@@ -20,7 +20,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AccountService accountService;
     private final CreditCardService creditCardService;
-    private final String PAYMENT_URL = "localhost:4201/payment";
+    private final String PAYMENT_URL = "http://localhost:4201/payment";
 
     public PaymentService(TransactionService transactionService, PaymentRepository paymentRepository,
                           AccountService accountService, CreditCardService creditCardService) {

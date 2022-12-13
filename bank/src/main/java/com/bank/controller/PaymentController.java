@@ -22,8 +22,8 @@ public class PaymentController {
         return paymentService.getPaymentUrlAndId(requestDto);
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping("/credit-card/{paymentId}")
+    @CrossOrigin(origins = "http://localhost:4201")
+    @PostMapping("credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public RedirectDto payByCreditCard(@PathVariable Long paymentId, @RequestBody CreditCardInfoDto requestDto) {
         Payment payment = paymentService.payByCreditCard(requestDto, paymentId);

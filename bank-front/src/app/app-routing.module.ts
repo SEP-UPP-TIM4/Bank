@@ -4,7 +4,7 @@ import { CreditCardInfoComponent } from './credit-card-info/credit-card-info.com
 
 const routes: Routes = [
   { path: ':id', component: CreditCardInfoComponent},
-  { path: 'redirect/:id', component: CreditCardInfoComponent}
+  { path: 'payment/:id', component: CreditCardInfoComponent}
 ];
 
 @NgModule({
