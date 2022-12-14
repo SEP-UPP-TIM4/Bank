@@ -46,7 +46,7 @@ export class CreditCardInfoComponent implements OnInit {
     const expirationYear = this.expirationYear?.value;
     const cvv = this.cvc?.value;
     const pan = firstFourDigits + secondFourDigits + thirdFourDigits + lastFourDigits;
-    const expirationDate = new Date(expirationYear, expirationMonth - 1);
+    const expirationDate = new Date(expirationYear, expirationMonth, 1);
 
     let creditCardInfoDto = new CreditCardInfoDTO({
       pan,
