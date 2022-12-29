@@ -8,11 +8,13 @@ import { MaterialModule } from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CreditCardInfoComponent } from './credit-card-info/credit-card-info.component';
+import { QrCodeComponent } from './qr-code/qr-code.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CreditCardInfoComponent
+    CreditCardInfoComponent,
+    QrCodeComponent
   ],
   imports: [
     BrowserModule,

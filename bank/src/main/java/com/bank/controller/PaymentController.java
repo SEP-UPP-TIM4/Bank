@@ -24,6 +24,12 @@ public class PaymentController {
         return paymentService.getPaymentUrlAndId(requestDto);
     }
 
+    @PostMapping("validate-qr")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ValidateResponseDto validateQr(@RequestBody ValidateRequestDto requestDto) {
+        return paymentService.getPaymentUrlAndIdQr(requestDto);
+    }
+
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)

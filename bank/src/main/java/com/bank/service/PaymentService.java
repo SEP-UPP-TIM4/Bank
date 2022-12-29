@@ -29,6 +29,7 @@ public class PaymentService {
     private final RestTemplate restTemplate;
 
     private final String PAYMENT_URL = "http://localhost:4201/payment";
+    private final String QR_PAYMENT_URL = "http://localhost:4201/qr-payment";
 
     public PaymentService(TransactionService transactionService, PaymentRepository paymentRepository,
                           AccountService accountService, CreditCardService creditCardService, RestTemplate restTemplate) {
@@ -44,6 +45,13 @@ public class PaymentService {
         Payment newPayment = createPayment(requestDto);
         log.info("Payment with id {} successfully created", newPayment.getId());
         return new ValidateResponseDto(PAYMENT_URL, newPayment.getId());
+    }
+
+    public ValidateResponseDto getPaymentUrlAndIdQr(ValidateRequestDto requestDto) {
+        accountService.validateAccount(UUID.fromString(requestDto.getMerchantId()), requestDto.getMerchantPassword());
+        Payment newPayment = createPayment(requestDto);
+        log.info("Payment with id {} successfully created", newPayment.getId());
+        return new ValidateResponseDto(QR_PAYMENT_URL, newPayment.getId());
     }
 
     public Payment createPayment(ValidateRequestDto requestDto) {
