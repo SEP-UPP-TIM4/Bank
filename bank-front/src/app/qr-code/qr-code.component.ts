@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { QrCodeService } from 'src/service/qr-code.service';
+import { ActivatedRoute } from '@angular/router'
 
 @Component({
   selector: 'app-qr-code',
@@ -7,9 +9,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class QrCodeComponent implements OnInit {
 
-  constructor() { }
+  qrCode: any;
+
+  constructor(private qrCodeService: QrCodeService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
+    const paymentId = this.route.snapshot.paramMap.get('id');
+    this.qrCodeService.generateQr(paymentId).subscribe((data: any) => {
+      this.qrCode = data;
+    }, (err: any) => {
+      alert("An error occured, please try again...");
+    })
   }
 
 }

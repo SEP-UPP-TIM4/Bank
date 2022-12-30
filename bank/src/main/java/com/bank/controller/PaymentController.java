@@ -3,9 +3,12 @@ package com.bank.controller;
 import com.bank.dto.*;
 import com.bank.model.Payment;
 import com.bank.service.PaymentService;
+import com.bank.service.QrCodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.awt.image.BufferedImage;
 
 @Slf4j
 @RestController

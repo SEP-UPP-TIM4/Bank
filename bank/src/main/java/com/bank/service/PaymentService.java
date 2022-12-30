@@ -108,6 +108,12 @@ public class PaymentService {
         }
     }
 
+    public Payment findById(Long id){
+        Optional<Payment> payment = paymentRepository.findById(id);
+        if(!payment.isPresent()) throw new NotFoundException(Payment.class.getSimpleName());
+        return payment.get();
+    }
+
     private Account makeRestCall(Payment payment) {
         return new Account();
     }
