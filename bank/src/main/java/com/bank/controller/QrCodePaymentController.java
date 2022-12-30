@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.util.UUID;
 
 @Slf4j
@@ -33,8 +34,10 @@ public class QrCodePaymentController {
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("gen/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public String generateQr(@PathVariable Long paymentId) throws WriterException, IOException {
-        return toBase64(qrCodeService.generateQrCode(paymentId));
+    public String generateQr(@PathVariable Long paymentId) throws WriterException, IOException, NotFoundException {
+        BufferedImage qrCode = qrCodeService.generateQrCode(paymentId);
+        qrCodeService.validateQrCode(qrCode);
+        return toBase64(qrCode);
     }
 
     @CrossOrigin(origins = "http://localhost:4201")

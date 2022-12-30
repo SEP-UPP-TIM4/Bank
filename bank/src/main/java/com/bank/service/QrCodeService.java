@@ -4,6 +4,7 @@ import com.bank.dto.NewQrCodeDto;
 import com.bank.dto.PaymentResponseDto;
 import com.bank.exception.ErrorInCommunicationException;
 import com.bank.exception.NotFoundException;
+import com.bank.exception.QrCodeNotValidException;
 import com.bank.model.Account;
 import com.bank.model.Payment;
 import com.google.zxing.*;
@@ -22,6 +23,8 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -48,7 +51,7 @@ public class QrCodeService {
         Payment payment = paymentService.findById(paymentId);
         NewQrCodeDto qrCodeDto = new NewQrCodeDto("PR", "01", "1", payment.getTransaction().getAcquirer().getNumber(),
                                                     payment.getTransaction().getAcquirer().getName(), payment.getTransaction().getCurrency().toString() + payment.getTransaction().getAmount().toString(),
-                                                    "Katarina Žerajić, Nemanjića bb, Nevesinje", "221", "uplata na račun", "97");
+                                                    "Katarina Žerajić, Nemanjića bb, Nevesinje", "221", "uplata na račun", "");
         BitMatrix bitMatrix = qrCodeWriter.encode(generateQrCodeString(qrCodeDto), BarcodeFormat.QR_CODE, 250, 250, hints);
         return MatrixToImageWriter.toBufferedImage(bitMatrix);
     }
@@ -134,6 +137,120 @@ public class QrCodeService {
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
+    }
 
+    public void validateQrCode(BufferedImage qrCode) throws com.google.zxing.NotFoundException, IOException {
+        String qrCodeText = readQR(qrCode);
+        String[] qrParts = qrCodeText.split("\\|");
+        if(qrCodeText.charAt(0) == '|') throw new QrCodeNotValidException("'|' should not be at the beginning.");
+        if(qrCodeText.charAt(qrCodeText.length() - 1) == '|') throw new QrCodeNotValidException("'|' should not be at the end.");
+        if(!isKValid(qrParts[0])) throw new QrCodeNotValidException("Identification code (K) not valid");
+        if(!isVValid(qrParts[1])) throw new QrCodeNotValidException("Version (V) not valid");
+        if(!isCValid(qrParts[2])) throw new QrCodeNotValidException("Character set (C) not valid");
+        if(!isRValid(qrParts[3])) throw new QrCodeNotValidException("Account number (R) not valid");
+        if(!isNValid(qrParts[4])) throw new QrCodeNotValidException("Payee personal data (N) not valid");
+        if(!isIValid(qrParts[5])) throw new QrCodeNotValidException("Payment amount (I) not valid");
+        if(!isPValid(qrParts[6])) throw new QrCodeNotValidException("Payer personal data (P) not valid");
+        if(!isSfValid(qrParts[7])) throw new QrCodeNotValidException("Payment code (SF) not valid");
+        if(!isSValid(qrParts[8])) throw new QrCodeNotValidException("Payment purpose (S) not valid");
+        if(qrParts.length == 10) {
+            if (!isROValid(qrParts[9])) throw new QrCodeNotValidException("Model and reference number (RO) not valid");
+        }
+    }
+
+    public boolean isKValid(String K) {
+        if(!K.split(":")[0].equals("K")) return false;
+        return K.split(":")[1].equals("PR");
+    }
+    public boolean isVValid(String V) {
+        if(!V.split(":")[0].equals("V")) return false;
+        return V.split(":")[1].equals("01");
+    }
+
+    public boolean isCValid(String C) {
+        if(!C.split(":")[0].equals("C")) return false;
+        return C.split(":")[1].equals("1");
+    }
+
+    public boolean isRValid(String R) {
+        if(!R.split(":")[0].equals("R")) return false;
+        String s = R.split(":")[1];
+        if(s.length() != 18)
+            return false;
+        for(char c : s.toCharArray()){
+            if(!Character.isDigit(c)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isNValid(String N) {
+        if(!N.split(":")[0].equals("N")) return false;
+        String s = N.split(":")[1];
+        if(s.split("\r\n|\r|\n").length > 3)
+            return false;
+        s.replace("\n", "").replace("\r", "");
+        if(s.length() > 70)
+            return false;
+
+        return true;
+    }
+
+    public boolean isIValid(String I) {
+        if(!I.split(":")[0].equals("I")) return false;
+        Pattern p = Pattern.compile("[A-Z]{3}[0-9]+.[0-9]*{5,18}");
+        String s = I.split(":")[1];
+        Matcher m = p.matcher(s);
+        if(m.matches())
+            return true;
+        return false;
+    }
+
+    public boolean isPValid(String P) {
+        String s = P.split(":")[1];
+        if(s.split("\r\n|\r|\n").length > 3)
+            return false;
+        s.replace("\n", "").replace("\r", "");
+        if(s.length() > 70)
+            return false;
+
+        return true;
+    }
+
+    public boolean isSfValid(String sF) {
+        if(!sF.split(":")[0].equals("SF")) return false;
+        String s = sF.split(":")[1];
+        Pattern p = Pattern.compile("[1|2]{1}[0-9]{2}");
+        Matcher m = p.matcher(s);
+        if(m.matches())
+            return true;
+        return false;
+    }
+
+    public boolean isSValid(String S) {
+        String s = S.split(":")[1];
+        if(s.equals(""))
+            return true;
+        if(s.split("\r\n|\r|\n").length > 1)
+            return false;
+        if(s.length() > 35)
+            return false;
+        return true;
+    }
+
+    public boolean isROValid(String ro) {
+        String s = ro.split(":")[1];
+        if(s.equals(""))
+            return true;
+        if(s.length() > 25)
+            return false;
+        Pattern p = Pattern.compile("[0-9]{2}[0-9|-]+");
+        Matcher m = p.matcher(s);
+        if(s.contains("-") && s.charAt(0) == '9' && s.charAt(1) == '7')
+            return false;
+        if(m.matches())
+            return true;
+        return false;
     }
 }

@@ -1,10 +1,10 @@
 INSERT INTO accounts(
     id, address, amount, currency, name, number, password, reserved_amount)
-VALUES ('547c7ba9-fc3e-4e48-ab78-6e1ab8e220f0', 'Address', 100000.0, 1, 'merchant', '3189283102123', '$2a$10$i9gbDSXwPUh99J5Vw9zIveeDdTduv/ZzN3ydURP0pkHDpckqABpOi', 0.0);
+VALUES ('547c7ba9-fc3e-4e48-ab78-6e1ab8e220f0', 'Address', 100000.0, 1, 'merchant', '318928310212356784', '$2a$10$i9gbDSXwPUh99J5Vw9zIveeDdTduv/ZzN3ydURP0pkHDpckqABpOi', 0.0);
 
 INSERT INTO accounts(
     id, address, amount, currency, name, number, password, reserved_amount)
-VALUES ('8e3416d8-6b2b-4ef4-acc0-489b8a57a745', 'Address', 100000.0, 1, 'issuer', '3123483102123', '$2a$10$i9gbDSXwPUh99J5Vw9zIveeDdTduv/ZzN3ydURP0pkHDpckqABpOi', 0.0);
+VALUES ('8e3416d8-6b2b-4ef4-acc0-489b8a57a745', 'Address', 100000.0, 1, 'issuer', '312348310212387654', '$2a$10$i9gbDSXwPUh99J5Vw9zIveeDdTduv/ZzN3ydURP0pkHDpckqABpOi', 0.0);
 
 INSERT INTO credit_card(
     id, cvv, expiration_date, pan, account_id)
