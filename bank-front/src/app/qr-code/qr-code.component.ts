@@ -22,4 +22,13 @@ export class QrCodeComponent implements OnInit {
     })
   }
 
+  pay(){
+    const paymentId = this.route.snapshot.paramMap.get('id');
+    this.qrCodeService.pay(paymentId, this.qrCode).subscribe((data: any) => {
+      window.location.href = data.redirect
+    }, (err: any) => {
+      alert("An error occured, please try again...");
+    })
+  }
+
 }

@@ -1,6 +1,10 @@
 package com.bank.controller;
 
+import com.bank.dto.QrCodeDto;
+import com.bank.dto.RedirectDto;
+import com.bank.model.Payment;
 import com.bank.service.QrCodeService;
+import com.google.zxing.NotFoundException;
 import com.google.zxing.WriterException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -9,8 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -28,6 +35,32 @@ public class QrCodePaymentController {
     @ResponseStatus(value = HttpStatus.OK)
     public String generateQr(@PathVariable Long paymentId) throws WriterException, IOException {
         return toBase64(qrCodeService.generateQrCode(paymentId));
+    }
+
+    @CrossOrigin(origins = "http://localhost:4201")
+    @PostMapping("pay/{paymentId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public RedirectDto processPayment(@RequestBody QrCodeDto qrCode, @PathVariable Long paymentId) throws WriterException, IOException, NotFoundException {
+        Payment payment = qrCodeService.payByQrCode(paymentId, UUID.fromString(qrCode.getIssuerUuid()));
+        qrCodeService.finishPayment(payment);
+        log.info("Payment wit id {} successfully finished!", paymentId);
+        return new RedirectDto(payment.getSuccessUrl());
+    }
+
+    private BufferedImage toBufferedImage(String base64) throws IOException {
+        String imageString = base64.split(",")[1];
+
+        BufferedImage image = null;
+        byte[] imageByte;
+
+        imageByte = Base64.decodeBase64(imageString);
+        ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+        image = ImageIO.read(bis);
+        bis.close();
+
+        File outputfile = new File("image.png");
+        ImageIO.write(image, "png", outputfile);
+        return image;
     }
 
     private String toBase64(BufferedImage img) throws IOException {

@@ -114,6 +114,10 @@ public class PaymentService {
         return payment.get();
     }
 
+    public Payment save(Payment payment){
+        return paymentRepository.save(payment);
+    }
+
     private Account makeRestCall(Payment payment) {
         return new Account();
     }
