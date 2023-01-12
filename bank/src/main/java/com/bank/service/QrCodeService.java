@@ -49,8 +49,11 @@ public class QrCodeService {
         Hashtable hints = new Hashtable();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         Payment payment = paymentService.findById(paymentId);
-        NewQrCodeDto qrCodeDto = new NewQrCodeDto("PR", "01", "1", payment.getTransaction().getAcquirer().getNumber(),
-                                                    payment.getTransaction().getAcquirer().getName(), payment.getTransaction().getCurrency().toString() + payment.getTransaction().getAmount().toString(),
+        // TODO: proveriti sa Katarinom
+//        NewQrCodeDto qrCodeDto = new NewQrCodeDto("PR", "01", "1", payment.getTransaction().getAcquirer().getNumber(),
+//                payment.getTransaction().getAcquirer().getName(), payment.getTransaction().getCurrency().toString() + payment.getTransaction().getAmount().toString(),
+        NewQrCodeDto qrCodeDto = new NewQrCodeDto("PR", "01", "1", payment.getAcquirerTransaction().getAccount().getNumber(),
+                                                    payment.getAcquirerTransaction().getAccount().getName(), payment.getAcquirerTransaction().getCurrency().toString() + payment.getAcquirerTransaction().getAmount().toString(),
                                                     "Katarina Žerajić, Nemanjića bb, Nevesinje", "221", "uplata na račun", "");
         BitMatrix bitMatrix = qrCodeWriter.encode(generateQrCodeString(qrCodeDto), BarcodeFormat.QR_CODE, 250, 250, hints);
         return MatrixToImageWriter.toBufferedImage(bitMatrix);
@@ -87,7 +90,8 @@ public class QrCodeService {
         Payment payment = paymentService.findById(paymentId);
         Account account = accountService.getById(issuerUuid);
         processPayment(issuerUuid, payment);
-        payment.getTransaction().setIssuer(account);
+        payment.getIssuerTransaction().setAccount(account);
+//        payment.getTransaction().setIssuer(account);
         return paymentService.save(payment);
     }
 
@@ -126,11 +130,11 @@ public class QrCodeService {
     public void finishPayment(Payment payment) {
         PaymentResponseDto paymentDto = new PaymentResponseDto();
         paymentDto.setMerchantOrderId(payment.getMerchantOrderId());
-        paymentDto.setAcquirerOrderId(payment.getTransaction().getId());
-        paymentDto.setAcquirerTimestamp(payment.getTransaction().getTimeStamp());
+        paymentDto.setAcquirerOrderId(payment.getAcquirerTransaction().getId());
+        paymentDto.setAcquirerTimestamp(payment.getAcquirerTransaction().getTimestamp());
         paymentDto.setPaymentId(payment.getId());
-        paymentDto.setTransactionStatus(payment.getTransaction().getStatus().toString());
-        paymentDto.setTransactionAmount(payment.getTransaction().getAmount());
+        paymentDto.setTransactionStatus(payment.getAcquirerTransaction().getStatus().toString());
+        paymentDto.setTransactionAmount(payment.getAcquirerTransaction().getAmount());
         try {
             // TODO: try to get this url from database
             restTemplate.postForObject(FINISH_PAYMENT_URL, paymentDto, PaymentResponseDto.class);

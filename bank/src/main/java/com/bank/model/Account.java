@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -23,6 +24,7 @@ public class Account {
     private String password;
 
     @Setter
+    @Column(unique = true)
     private String number;
 
     @Setter

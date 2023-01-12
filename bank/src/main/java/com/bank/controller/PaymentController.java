@@ -39,7 +39,12 @@ public class PaymentController {
     public RedirectDto payByCreditCard(@PathVariable Long paymentId, @RequestBody CreditCardInfoDto requestDto) {
         Payment payment = paymentService.payByCreditCard(requestDto, paymentId);
         paymentService.finishPayment(payment);
-        log.info("Payment wit id {} successfully finished!", paymentId);
+        log.info("Payment with id {} successfully finished!", paymentId);
         return new RedirectDto(payment.getSuccessUrl());
+    }
+
+    @PostMapping("pcc")
+    public PccResponseDto recieve(@RequestBody PccRequestDto requestDto) {
+        return new PccResponseDto();
     }
 }

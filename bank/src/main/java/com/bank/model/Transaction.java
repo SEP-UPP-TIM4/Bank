@@ -1,8 +1,9 @@
 package com.bank.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,18 +18,10 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;             //acquirer/issuer(ako je banka kupca) order id
+    private Long id;                        //acquirer/issuer order id
 
     @Setter
-    @Nullable
-    @ManyToOne
-    @JoinColumn
-    private Account issuer;
-
-    @Setter
-    @ManyToOne
-    @JoinColumn
-    private Account acquirer;
+    private LocalDateTime timestamp;        //acquirer/issuer timestamp
 
     @Setter
     private BigDecimal amount;
@@ -38,15 +31,21 @@ public class Transaction {
     private Currency currency;
 
     @Setter
-    private LocalDateTime timeStamp;
-
-    @Setter
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private TransactionStatus status = TransactionStatus.PENDING;
 
     @PrePersist
     protected void onCreate() {
-        timeStamp = LocalDateTime.now();
+        timestamp = LocalDateTime.now();
     }
+
+    @Setter
+    @ManyToOne
+    @Nullable
+    @JoinColumn(name = "account_number", referencedColumnName = "number")
+    private Account account;
+
+    @Setter
+    private boolean income;     // da li je priliv (true) ili odliv (false) novca
 }

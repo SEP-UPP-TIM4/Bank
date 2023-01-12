@@ -29,6 +29,11 @@ public class Payment {
     @Setter
     private String errorUrl;
 
+    @Setter
     @OneToOne
-    private Transaction transaction;
+    private Transaction acquirerTransaction;
+
+    @Setter
+    @OneToOne
+    private Transaction issuerTransaction;
 }

@@ -32,18 +32,19 @@ public class AccountService {
         if(!passwordEncoder.matches(merchantPassword,account.getPassword())) throw new BadCredentialsException(merchantId.toString());
     }
 
-    public Account pay(Account account, Payment payment) throws NotEnoughFundsException{
-        int compareResult = account.getAmount().compareTo(payment.getTransaction().getAmount());
+    public Account pay(Account issuer, Payment payment) throws NotEnoughFundsException{
+        int compareResult = issuer.getAmount().compareTo(payment.getAcquirerTransaction().getAmount());
         if(compareResult < 0){
-            payment.getTransaction().setStatus(TransactionStatus.FAILED);
-            payment.getTransaction().setIssuer(account);
-            transactionService.save(payment.getTransaction());
+            payment.getAcquirerTransaction().setStatus(TransactionStatus.FAILED);
+            transactionService.save(payment.getAcquirerTransaction());
             throw new NotEnoughFundsException(payment.getFailedUrl());
         }
-        payment.getTransaction().setStatus(TransactionStatus.PROCESSED);
-        account.setAmount(account.getAmount().subtract(payment.getTransaction().getAmount()));
-        account.setReservedAmount(account.getReservedAmount().add(payment.getTransaction().getAmount()));
-        return accountRepository.save(account);
+        Account acquirer = payment.getAcquirerTransaction().getAccount();
+        acquirer.setAmount(acquirer.getAmount().add(payment.getAcquirerTransaction().getAmount()));
+        accountRepository.save(acquirer);
+        payment.getAcquirerTransaction().setStatus(TransactionStatus.PROCESSED);
+        issuer.setAmount(issuer.getAmount().subtract(payment.getAcquirerTransaction().getAmount()));
+        return accountRepository.save(issuer);
     }
 
     public Account getById(UUID merchantId) {

@@ -4,11 +4,9 @@ package com.bank.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
