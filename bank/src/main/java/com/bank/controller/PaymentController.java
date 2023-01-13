@@ -3,12 +3,9 @@ package com.bank.controller;
 import com.bank.dto.*;
 import com.bank.model.Payment;
 import com.bank.service.PaymentService;
-import com.bank.service.QrCodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.awt.image.BufferedImage;
 
 @Slf4j
 @RestController
@@ -23,13 +20,13 @@ public class PaymentController {
 
     @PostMapping("validate")
     @ResponseStatus(value = HttpStatus.OK)
-    public ValidateResponseDto validate(@RequestBody ValidateRequestDto requestDto) {
+    public ValidateResponseDto validate(@RequestBody ValidationRequestDto requestDto) {
         return paymentService.getPaymentUrlAndId(requestDto);
     }
 
     @PostMapping("validate-qr")
     @ResponseStatus(value = HttpStatus.OK)
-    public ValidateResponseDto validateQr(@RequestBody ValidateRequestDto requestDto) {
+    public ValidateResponseDto validateQr(@RequestBody ValidationRequestDto requestDto) {
         return paymentService.getPaymentUrlAndIdQr(requestDto);
     }
 
@@ -44,7 +41,8 @@ public class PaymentController {
     }
 
     @PostMapping("pcc")
-    public PccResponseDto recieve(@RequestBody PccRequestDto requestDto) {
-        return new PccResponseDto();
+    @ResponseStatus(HttpStatus.OK)
+    public PccResponseDto receive(@RequestBody PccRequestDto requestDto) {
+       return paymentService.processExternalPayment(requestDto);
     }
 }

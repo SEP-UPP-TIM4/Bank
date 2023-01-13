@@ -1,7 +1,6 @@
 package com.bank.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
@@ -33,7 +32,7 @@ public class Transaction {
     @Setter
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private TransactionStatus status = TransactionStatus.PENDING;
+    private Status status = Status.PENDING;
 
     @PrePersist
     protected void onCreate() {

@@ -2,13 +2,18 @@ package com.bank.service;
 
 import com.bank.dto.*;
 import com.bank.exception.ErrorInCommunicationException;
+import com.bank.exception.NotEnoughFundsException;
 import com.bank.exception.NotFoundException;
 import com.bank.model.*;
 import com.bank.repository.PaymentRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,26 +43,29 @@ public class PaymentService {
         this.pccResponseService = pccResponseService;
     }
 
-    public ValidateResponseDto getPaymentUrlAndId(ValidateRequestDto requestDto) {
+    public ValidateResponseDto getPaymentUrlAndId(ValidationRequestDto requestDto) {
         accountService.validateAccount(UUID.fromString(requestDto.getMerchantId()), requestDto.getMerchantPassword());
         Payment newPayment = createPayment(requestDto);
         log.info("Payment with id {} successfully created", newPayment.getId());
         return new ValidateResponseDto(PAYMENT_URL, newPayment.getId());
     }
 
-    public ValidateResponseDto getPaymentUrlAndIdQr(ValidateRequestDto requestDto) {
+    public ValidateResponseDto getPaymentUrlAndIdQr(ValidationRequestDto requestDto) {
         accountService.validateAccount(UUID.fromString(requestDto.getMerchantId()), requestDto.getMerchantPassword());
         Payment newPayment = createPayment(requestDto);
         log.info("Payment with id {} successfully created", newPayment.getId());
         return new ValidateResponseDto(QR_PAYMENT_URL, newPayment.getId());
     }
 
-    public Payment createPayment(ValidateRequestDto requestDto) {
+    public Payment createPayment(ValidationRequestDto requestDto) {
         Transaction acquirerTransaction = transactionService.createAcquirerTransaction(accountService.getById(UUID.fromString(requestDto.getMerchantId())),
                 requestDto.getAmount(), requestDto.getCurrency());
-        Payment payment = Payment.builder().merchantOrderId(requestDto.getMerchantOrderId())
+        Payment payment = Payment.builder()
+                .merchantOrderId(requestDto.getMerchantOrderId())
                 .merchantTimestamp(requestDto.getMerchantTimestamp())
-                .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl()).errorUrl(requestDto.getErrorUrl())
+                .successUrl(requestDto.getSuccessUrl()).failedUrl(requestDto.getFailedUrl())
+                .errorUrl(requestDto.getErrorUrl())
+                .status(Status.PENDING)
                 .acquirerTransaction(acquirerTransaction)
                 .build();
         log.info("Acquirer transaction with id {} successfully created", acquirerTransaction.getId());
@@ -66,41 +74,48 @@ public class PaymentService {
 
     public Payment payByCreditCard(CreditCardInfoDto creditCardInfoDto, Long paymentId){
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new NotFoundException(Payment.class.getSimpleName()));
-        processPayment(creditCardInfoDto, payment);
+        return processPayment(creditCardInfoDto, payment);
+    }
+
+    private Payment processPayment(CreditCardInfoDto creditCardInfoDto, Payment payment) {
+        Optional<CreditCard> creditCard = creditCardService.getCreditCard(creditCardInfoDto);
+        if(creditCard.isPresent()){
+            return processInternalPayment(creditCard.get().getAccount(), payment);
+        } else {
+            return callPcc(creditCardInfoDto, payment);
+        }
+    }
+
+    public Payment processInternalPayment(Account issuer, Payment payment) throws NotEnoughFundsException {
+        int compareResult = issuer.getAmount().compareTo(payment.getAcquirerTransaction().getAmount());
+        if(compareResult < 0){
+            payment.getAcquirerTransaction().setStatus(Status.FAILED);
+            payment.setStatus(Status.FAILED);
+            paymentRepository.save(payment);
+            throw new NotEnoughFundsException(payment.getFailedUrl());
+        }
+        Transaction issuerTransaction = transactionService.createIssuerTransaction(issuer,
+                payment.getAcquirerTransaction().getAmount(),
+                payment.getAcquirerTransaction().getCurrency());
+        payment.setIssuerTransaction(issuerTransaction);
+        accountService.increaseAmount(payment.getAcquirerTransaction().getAccount(), payment.getAcquirerTransaction().getAmount());
+        payment.getAcquirerTransaction().setStatus(Status.PROCESSED);
+        payment.setStatus(Status.PROCESSED);
         return paymentRepository.save(payment);
     }
 
-    private void processPayment(CreditCardInfoDto creditCardInfoDto, Payment payment) {
-        Optional<CreditCard> creditCard = creditCardService.getCreditCard(creditCardInfoDto);
-        if(creditCard.isEmpty())
-            callPcc(creditCardInfoDto, payment);
-        else {
-            Account issuer = accountService.pay(creditCard.get().getAccount(), payment);
-            Transaction issuerTransaction = createIssuerTransaction(payment, issuer);
-            payment.setIssuerTransaction(issuerTransaction);
-        }
-    }
-
-    private void callPcc(CreditCardInfoDto creditCardInfo, Payment payment) {
+    public Payment callPcc(CreditCardInfoDto creditCardInfo, Payment payment) {
         try {
             PccResponseDto response = pccResponseService.makeRestCallToPcc(creditCardInfo, payment);
-            payment.getAcquirerTransaction().setStatus(response.isSuccess() ? TransactionStatus.PROCESSED : TransactionStatus.FAILED);
-            if(response.isSuccess()) {
-                Transaction issuerTransaction = createIssuerTransaction(payment, null);
-                payment.setIssuerTransaction(issuerTransaction);
-            }
+            payment.getAcquirerTransaction().setStatus(response.isSuccess() ? Status.PROCESSED : Status.FAILED);
+            payment.setStatus(response.isSuccess() ? Status.PROCESSED : Status.FAILED);
+            return paymentRepository.save(payment);
         } catch (Exception ex) {
-            payment.getAcquirerTransaction().setStatus(TransactionStatus.FAILED);
+            payment.getAcquirerTransaction().setStatus(Status.FAILED);
+            payment.setStatus(Status.FAILED);
             paymentRepository.save(payment);
             throw new ErrorInCommunicationException(payment.getErrorUrl());
         }
-    }
-
-    private Transaction createIssuerTransaction(Payment payment, Account issuer) {
-        Transaction transaction = transactionService.createIssuerTransaction(issuer,
-                payment.getAcquirerTransaction().getAmount(), payment.getAcquirerTransaction().getCurrency());
-        transaction.setStatus(TransactionStatus.PROCESSED);
-        return transaction;
     }
 
     public void finishPayment(Payment payment) {
@@ -113,7 +128,9 @@ public class PaymentService {
                 .transactionAmount(payment.getAcquirerTransaction().getAmount()).build();
         try {
             // TODO: try to get this url from database or somewhere else
-            restTemplate.postForObject(FINISH_URL, paymentDto, PaymentResponseDto.class);
+            HttpResponse response = restTemplate.postForObject(FINISH_URL, paymentDto, HttpResponse.class);
+            if(response!= null && response.statusCode() != 200)
+                finishPayment(payment);
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
@@ -127,4 +144,28 @@ public class PaymentService {
     public Payment save(Payment payment){
         return paymentRepository.save(payment);
     }
+
+    public PccResponseDto processExternalPayment(PccRequestDto requestDto) {
+        Optional<CreditCard> creditCard = findCreditCard(requestDto);
+        if(creditCard.isEmpty())
+            return PccResponseDto.builder()
+                    .acquirerOrderId(requestDto.getAcquirerOrderId())
+                    .acquirerTimestamp(requestDto.getAcquirerTimestamp())
+                    .issuerOrderId(null)
+                    .issuerTimestamp(null)
+                    .success(false).build();
+//        return accountService.makePayment(requestDto.getAmount(), requestDto.getCurrency(), creditCard.get().getAccount());
+        return new PccResponseDto();
+    }
+
+    private Optional<CreditCard> findCreditCard(PccRequestDto requestDto) {
+        CreditCardInfoDto creditCardInfoDto = CreditCardInfoDto.builder()
+                .cardholderName(requestDto.getCardholderName())
+                .pan(requestDto.getPan())
+                .cvv(requestDto.getCvv())
+                .expirationDate(requestDto.getExpirationDate())
+                .build();
+        return creditCardService.getCreditCard(creditCardInfoDto);
+    }
+
 }

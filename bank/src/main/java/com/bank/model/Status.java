@@ -1,6 +1,6 @@
 package com.bank.model;
 
-public enum TransactionStatus {
+public enum Status {
     PENDING,
     PROCESSED,
     FAILED

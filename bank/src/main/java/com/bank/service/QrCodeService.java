@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.Hashtable;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,8 +35,7 @@ public class QrCodeService {
     private final AccountService accountService;
     private final RestTemplate restTemplate;
 
-
-    private final String FINISH_PAYMENT_URL = "http://localhost:8081/QR-CODE-SERVICE/api/v1/payment/finish";
+    public static final String FINISH_URL = "http://localhost:8081/QR-CODE-SERVICE/api/v1/payment/finish";
 
     public QrCodeService(PaymentService paymentService, AccountService accountService, RestTemplate restTemplate) {
         this.paymentService = paymentService;
@@ -49,9 +48,6 @@ public class QrCodeService {
         Hashtable hints = new Hashtable();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         Payment payment = paymentService.findById(paymentId);
-        // TODO: proveriti sa Katarinom
-//        NewQrCodeDto qrCodeDto = new NewQrCodeDto("PR", "01", "1", payment.getTransaction().getAcquirer().getNumber(),
-//                payment.getTransaction().getAcquirer().getName(), payment.getTransaction().getCurrency().toString() + payment.getTransaction().getAmount().toString(),
         NewQrCodeDto qrCodeDto = new NewQrCodeDto("PR", "01", "1", payment.getAcquirerTransaction().getAccount().getNumber(),
                                                     payment.getAcquirerTransaction().getAccount().getName(), payment.getAcquirerTransaction().getCurrency().toString() + payment.getAcquirerTransaction().getAmount().toString(),
                                                     "Katarina Žerajić, Nemanjića bb, Nevesinje", "221", "uplata na račun", "");
@@ -95,16 +91,16 @@ public class QrCodeService {
         return paymentService.save(payment);
     }
 
-    private Account processPayment(UUID issuerUuid, Payment payment) {
+    private Payment processPayment(UUID issuerUuid, Payment payment) {
         Optional<Account> account = Optional.ofNullable(accountService.getById(issuerUuid));
         if(account.isPresent()){
-            return accountService.pay(account.get(), payment);
+            return paymentService.processInternalPayment(account.get(), payment);
         } else {
-            return callPcp(payment);
+            return callPcc(payment);
         }
     }
 
-    private Account callPcp(Payment payment) {
+    private Payment callPcc(Payment payment) {
         try {
             // TODO: make rest call to PCC to get account from other bank
             return makeRestCall(payment);
@@ -113,11 +109,11 @@ public class QrCodeService {
         }
     }
 
-    private Account makeRestCall(Payment payment) {
-        return new Account();
+    private Payment makeRestCall(Payment payment) {
+        return new Payment();
     }
 
-    public static String readQR(BufferedImage qrCode) throws FileNotFoundException, IOException, NotFoundException, com.google.zxing.NotFoundException {
+    public static String readQR(BufferedImage qrCode) throws NotFoundException, com.google.zxing.NotFoundException {
         BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(
                 new BufferedImageLuminanceSource(qrCode)));
 
@@ -128,16 +124,18 @@ public class QrCodeService {
     }
 
     public void finishPayment(Payment payment) {
-        PaymentResponseDto paymentDto = new PaymentResponseDto();
-        paymentDto.setMerchantOrderId(payment.getMerchantOrderId());
-        paymentDto.setAcquirerOrderId(payment.getAcquirerTransaction().getId());
-        paymentDto.setAcquirerTimestamp(payment.getAcquirerTransaction().getTimestamp());
-        paymentDto.setPaymentId(payment.getId());
-        paymentDto.setTransactionStatus(payment.getAcquirerTransaction().getStatus().toString());
-        paymentDto.setTransactionAmount(payment.getAcquirerTransaction().getAmount());
+        PaymentResponseDto paymentDto = PaymentResponseDto.builder()
+                .merchantOrderId(payment.getMerchantOrderId())
+                .acquirerOrderId(payment.getAcquirerTransaction().getId())
+                .acquirerTimestamp(payment.getAcquirerTransaction().getTimestamp())
+                .paymentId(payment.getId())
+                .transactionStatus(payment.getAcquirerTransaction().getStatus().toString())
+                .transactionAmount(payment.getAcquirerTransaction().getAmount()).build();
         try {
-            // TODO: try to get this url from database
-            restTemplate.postForObject(FINISH_PAYMENT_URL, paymentDto, PaymentResponseDto.class);
+            // TODO: try to get this url from database or somewhere else
+            HttpResponse response = restTemplate.postForObject(FINISH_URL, paymentDto, HttpResponse.class);
+            if(response!= null && response.statusCode() != 200)
+                finishPayment(payment);
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }

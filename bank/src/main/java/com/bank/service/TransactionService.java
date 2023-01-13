@@ -3,7 +3,7 @@ package com.bank.service;
 import com.bank.model.Account;
 import com.bank.model.Currency;
 import com.bank.model.Transaction;
-import com.bank.model.TransactionStatus;
+import com.bank.model.Status;
 import com.bank.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +14,11 @@ public class  TransactionService {
 
     private final TransactionRepository transactionRepository;
 
-    public TransactionService(TransactionRepository transactionRepository) {
+    private final AccountService accountService;
+
+    public TransactionService(TransactionRepository transactionRepository, AccountService accountService) {
         this.transactionRepository = transactionRepository;
+        this.accountService = accountService;
     }
 
     public Transaction createAcquirerTransaction(Account account, BigDecimal amount, String currency) {
@@ -24,9 +27,11 @@ public class  TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public Transaction createIssuerTransaction(Account account, BigDecimal amount, Currency currency) {
-        Transaction transaction = createNewTransaction(account, amount, currency);
+    public Transaction createIssuerTransaction(Account issuer, BigDecimal amount, Currency currency) {
+        accountService.decreaseAmount(issuer, amount);
+        Transaction transaction = createNewTransaction(issuer, amount, currency);
         transaction.setIncome(false);
+        transaction.setStatus(Status.PROCESSED);
         return transactionRepository.save(transaction);
     }
 

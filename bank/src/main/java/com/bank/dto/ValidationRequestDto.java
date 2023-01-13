@@ -6,12 +6,11 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class ValidateRequestDto {
+public class ValidationRequestDto {
 
     private String merchantId;
 

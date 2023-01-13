@@ -16,8 +16,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;                                    //payment id
 
+    @Setter
     private Long merchantOrderId;
 
+    @Setter
     private LocalDateTime merchantTimestamp;
 
     @Setter
@@ -28,6 +30,10 @@ public class Payment {
 
     @Setter
     private String errorUrl;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Setter
     @OneToOne
