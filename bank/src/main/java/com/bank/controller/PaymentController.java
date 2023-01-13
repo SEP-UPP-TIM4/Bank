@@ -2,6 +2,7 @@ package com.bank.controller;
 
 import com.bank.dto.*;
 import com.bank.model.Payment;
+import com.bank.model.Status;
 import com.bank.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,8 @@ import java.util.UUID;
 public class PaymentController {
 
     private final PaymentService paymentService;
+
+    public static final String FINISH_URL = "http://localhost:8081/CREDIT-CARD-SERVICE/api/v1/payment/finish";
 
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
@@ -37,14 +40,14 @@ public class PaymentController {
     @ResponseStatus(value = HttpStatus.OK)
     public RedirectDto payByCreditCard(@PathVariable UUID paymentId, @RequestBody CreditCardInfoDto requestDto) {
         Payment payment = paymentService.payByCreditCard(requestDto, paymentId);
-        paymentService.finishPayment(payment);
+        paymentService.finishPayment(payment, FINISH_URL);
         log.info("Payment with id {} successfully finished!", paymentId);
-        return new RedirectDto(payment.getSuccessUrl());
+        return new RedirectDto(payment.getStatus() == Status.PROCESSED ? payment.getSuccessUrl() : payment.getFailedUrl());
     }
 
     @PostMapping("pcc")
     @ResponseStatus(HttpStatus.OK)
-    public PccResponseDto receive(@RequestBody PccRequestDto requestDto) {
+    public PccResponseDto processPccRequest(@RequestBody PccRequestDto requestDto) {
        return paymentService.processExternalPayment(requestDto);
     }
 }

@@ -41,7 +41,6 @@ public class Transaction {
 
     @Setter
     @ManyToOne
-    @Nullable
     @JoinColumn(name = "account_number", referencedColumnName = "number")
     private Account account;
 

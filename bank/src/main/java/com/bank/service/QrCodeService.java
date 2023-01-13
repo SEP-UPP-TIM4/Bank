@@ -33,14 +33,10 @@ public class QrCodeService {
     private final PaymentService paymentService;
 
     private final AccountService accountService;
-    private final RestTemplate restTemplate;
 
-    public static final String FINISH_URL = "http://localhost:8081/QR-CODE-SERVICE/api/v1/payment/finish";
-
-    public QrCodeService(PaymentService paymentService, AccountService accountService, RestTemplate restTemplate) {
+    public QrCodeService(PaymentService paymentService, AccountService accountService) {
         this.paymentService = paymentService;
         this.accountService = accountService;
-        this.restTemplate = restTemplate;
     }
 
     public BufferedImage generateQrCode(UUID paymentId) throws WriterException {
@@ -87,7 +83,6 @@ public class QrCodeService {
         Account account = accountService.getById(issuerUuid);
         processPayment(issuerUuid, payment);
         payment.getIssuerTransaction().setAccount(account);
-//        payment.getTransaction().setIssuer(account);
         return paymentService.save(payment);
     }
 
@@ -123,22 +118,8 @@ public class QrCodeService {
         return result.getText();
     }
 
-    public void finishPayment(Payment payment) {
-        PaymentResponseDto paymentDto = PaymentResponseDto.builder()
-                .merchantOrderId(payment.getMerchantOrderId())
-                .acquirerOrderId(payment.getAcquirerTransaction().getId())
-                .acquirerTimestamp(payment.getAcquirerTransaction().getTimestamp())
-                .paymentId(payment.getId())
-                .transactionStatus(payment.getAcquirerTransaction().getStatus().toString())
-                .transactionAmount(payment.getAcquirerTransaction().getAmount()).build();
-        try {
-            // TODO: try to get this url from database or somewhere else
-            HttpResponse response = restTemplate.postForObject(FINISH_URL, paymentDto, HttpResponse.class);
-            if(response!= null && response.statusCode() != 200)
-                finishPayment(payment);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-        }
+    public void finishPayment(Payment payment, String finishUrl) {
+        paymentService.finishPayment(payment, finishUrl);
     }
 
     public void validateQrCode(BufferedImage qrCode) throws com.google.zxing.NotFoundException, IOException {

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
-public class  TransactionService {
+public class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
@@ -38,9 +38,5 @@ public class  TransactionService {
     private Transaction createNewTransaction(Account account, BigDecimal amount, Currency currency) {
         return Transaction.builder().account(account).amount(amount)
                 .currency(currency).build();
-    }
-
-    public void save(Transaction transaction) {
-        transactionRepository.save(transaction);
     }
 }

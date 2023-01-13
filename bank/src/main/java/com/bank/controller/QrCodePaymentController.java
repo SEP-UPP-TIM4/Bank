@@ -13,11 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.util.UUID;
 
 @Slf4j
@@ -26,6 +23,8 @@ import java.util.UUID;
 public class QrCodePaymentController {
 
     private final QrCodeService qrCodeService;
+
+    public static final String FINISH_URL = "http://localhost:8081/QR-CODE-SERVICE/api/v1/payment/finish";
 
     public QrCodePaymentController(QrCodeService qrCodeService) {
         this.qrCodeService = qrCodeService;
@@ -43,27 +42,11 @@ public class QrCodePaymentController {
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("pay/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RedirectDto processPayment(@RequestBody QrCodeDto qrCode, @PathVariable UUID paymentId) throws WriterException, IOException, NotFoundException {
+    public RedirectDto processPayment(@RequestBody QrCodeDto qrCode, @PathVariable UUID paymentId) {
         Payment payment = qrCodeService.payByQrCode(paymentId, UUID.fromString(qrCode.getIssuerUuid()));
-        qrCodeService.finishPayment(payment);
+        qrCodeService.finishPayment(payment, FINISH_URL);
         log.info("Payment wit id {} successfully finished!", paymentId);
         return new RedirectDto(payment.getSuccessUrl());
-    }
-
-    private BufferedImage toBufferedImage(String base64) throws IOException {
-        String imageString = base64.split(",")[1];
-
-        BufferedImage image = null;
-        byte[] imageByte;
-
-        imageByte = Base64.decodeBase64(imageString);
-        ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
-        image = ImageIO.read(bis);
-        bis.close();
-
-        File outputfile = new File("image.png");
-        ImageIO.write(image, "png", outputfile);
-        return image;
     }
 
     private String toBase64(BufferedImage img) throws IOException {
