@@ -3,6 +3,7 @@ package com.bank.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import lombok.*;
 
@@ -19,7 +20,7 @@ public class PaymentResponseDto {
 
     private LocalDateTime acquirerTimestamp;
 
-    private Long paymentId;
+    private UUID paymentId;
 
     private String transactionStatus;
 

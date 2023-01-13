@@ -72,7 +72,7 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
 
-    public Payment payByCreditCard(CreditCardInfoDto creditCardInfoDto, Long paymentId){
+    public Payment payByCreditCard(CreditCardInfoDto creditCardInfoDto, UUID paymentId){
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new NotFoundException(Payment.class.getSimpleName()));
         return processPayment(creditCardInfoDto, payment);
     }
@@ -136,7 +136,7 @@ public class PaymentService {
         }
     }
 
-    public Payment findById(Long id){
+    public Payment findById(UUID id){
         return paymentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(Payment.class.getSimpleName()));
     }

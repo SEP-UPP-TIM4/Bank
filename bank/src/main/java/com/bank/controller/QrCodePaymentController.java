@@ -34,7 +34,7 @@ public class QrCodePaymentController {
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("gen/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public String generateQr(@PathVariable Long paymentId) throws WriterException, IOException, NotFoundException {
+    public String generateQr(@PathVariable UUID paymentId) throws WriterException, IOException, NotFoundException {
         BufferedImage qrCode = qrCodeService.generateQrCode(paymentId);
         qrCodeService.validateQrCode(qrCode);
         return toBase64(qrCode);
@@ -43,7 +43,7 @@ public class QrCodePaymentController {
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("pay/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RedirectDto processPayment(@RequestBody QrCodeDto qrCode, @PathVariable Long paymentId) throws WriterException, IOException, NotFoundException {
+    public RedirectDto processPayment(@RequestBody QrCodeDto qrCode, @PathVariable UUID paymentId) throws WriterException, IOException, NotFoundException {
         Payment payment = qrCodeService.payByQrCode(paymentId, UUID.fromString(qrCode.getIssuerUuid()));
         qrCodeService.finishPayment(payment);
         log.info("Payment wit id {} successfully finished!", paymentId);

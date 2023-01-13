@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping(value = "api/v1/payment")
@@ -33,7 +35,7 @@ public class PaymentController {
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RedirectDto payByCreditCard(@PathVariable Long paymentId, @RequestBody CreditCardInfoDto requestDto) {
+    public RedirectDto payByCreditCard(@PathVariable UUID paymentId, @RequestBody CreditCardInfoDto requestDto) {
         Payment payment = paymentService.payByCreditCard(requestDto, paymentId);
         paymentService.finishPayment(payment);
         log.info("Payment with id {} successfully finished!", paymentId);

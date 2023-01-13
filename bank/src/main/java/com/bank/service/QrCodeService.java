@@ -43,7 +43,7 @@ public class QrCodeService {
         this.restTemplate = restTemplate;
     }
 
-    public BufferedImage generateQrCode(Long paymentId) throws WriterException {
+    public BufferedImage generateQrCode(UUID paymentId) throws WriterException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         Hashtable hints = new Hashtable();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
@@ -82,7 +82,7 @@ public class QrCodeService {
         return qrCodeString;
     }
 
-    public Payment payByQrCode(Long paymentId, UUID issuerUuid){
+    public Payment payByQrCode(UUID paymentId, UUID issuerUuid){
         Payment payment = paymentService.findById(paymentId);
         Account account = accountService.getById(issuerUuid);
         processPayment(issuerUuid, payment);
