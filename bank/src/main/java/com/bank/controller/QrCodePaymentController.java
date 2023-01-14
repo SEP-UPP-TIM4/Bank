@@ -3,6 +3,7 @@ package com.bank.controller;
 import com.bank.dto.QrCodeDto;
 import com.bank.dto.RedirectDto;
 import com.bank.model.Payment;
+import com.bank.model.Status;
 import com.bank.service.QrCodeService;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.WriterException;
@@ -46,7 +47,7 @@ public class QrCodePaymentController {
         Payment payment = qrCodeService.payByQrCode(paymentId, UUID.fromString(qrCode.getIssuerUuid()));
         qrCodeService.finishPayment(payment, FINISH_URL);
         log.info("Payment wit id {} successfully finished!", paymentId);
-        return new RedirectDto(payment.getSuccessUrl());
+        return new RedirectDto(payment.getStatus() == Status.PROCESSED ? payment.getSuccessUrl() : payment.getFailedUrl());
     }
 
     private String toBase64(BufferedImage img) throws IOException {

@@ -74,7 +74,7 @@ public class PaymentService {
         return processPayment(creditCardInfoDto, payment);
     }
 
-    private Payment processPayment(CreditCardInfoDto creditCardInfoDto, Payment payment) {
+    public Payment processPayment(CreditCardInfoDto creditCardInfoDto, Payment payment) {
         Optional<CreditCard> creditCard = creditCardService.getCreditCard(creditCardInfoDto);
         if(creditCard.isPresent()){
             return processInternalPayment(creditCard.get().getAccount(), payment);

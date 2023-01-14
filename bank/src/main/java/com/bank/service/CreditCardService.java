@@ -3,13 +3,16 @@ package com.bank.service;
 import com.bank.dto.CreditCardInfoDto;
 import com.bank.exception.BadCvvException;
 import com.bank.exception.InvalidExpirationDateException;
+import com.bank.exception.NotFoundException;
 import com.bank.exception.WrongCardholderNameException;
 import com.bank.model.CreditCard;
+import com.bank.model.Payment;
 import com.bank.repository.CreditCardRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CreditCardService {
@@ -43,6 +46,8 @@ public class CreditCardService {
         //return !date.getMonth().equals(expectedDate.getMonth()) || !(date.getYear() == expectedDate.getYear()) || date.isBefore(LocalDate.now());
         return false;
     }
+
+    public CreditCard findByAccountId(UUID id){return creditCardRepository.findByAccountId(id).orElseThrow(() -> new NotFoundException(CreditCard.class.getSimpleName()));}
 
     private boolean validateSecurityCode(String cvv, String expectedCvv) {
         return !cvv.equals(expectedCvv);

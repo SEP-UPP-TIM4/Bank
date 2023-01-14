@@ -1,11 +1,11 @@
 package com.bank.service;
 
+import com.bank.dto.CreditCardInfoDto;
 import com.bank.dto.NewQrCodeDto;
-import com.bank.dto.PaymentResponseDto;
-import com.bank.exception.ErrorInCommunicationException;
 import com.bank.exception.NotFoundException;
 import com.bank.exception.QrCodeNotValidException;
 import com.bank.model.Account;
+import com.bank.model.CreditCard;
 import com.bank.model.Payment;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
@@ -15,13 +15,10 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.util.Hashtable;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,9 +31,12 @@ public class QrCodeService {
 
     private final AccountService accountService;
 
-    public QrCodeService(PaymentService paymentService, AccountService accountService) {
+    private final CreditCardService creditCardService;
+
+    public QrCodeService(PaymentService paymentService, AccountService accountService, CreditCardService creditCardService) {
         this.paymentService = paymentService;
         this.accountService = accountService;
+        this.creditCardService = creditCardService;
     }
 
     public BufferedImage generateQrCode(UUID paymentId) throws WriterException {
@@ -81,31 +81,15 @@ public class QrCodeService {
     public Payment payByQrCode(UUID paymentId, UUID issuerUuid){
         Payment payment = paymentService.findById(paymentId);
         Account account = accountService.getById(issuerUuid);
-        processPayment(issuerUuid, payment);
-        payment.getIssuerTransaction().setAccount(account);
-        return paymentService.save(payment);
+        CreditCard creditCard = creditCardService.findByAccountId(account.getId());
+        CreditCardInfoDto creditCardInfoDto = CreditCardInfoDto.builder()
+                .pan(creditCard.getPan()).cvv(creditCard.getCvv()).cardholderName(account.getName())
+                .expirationDate(creditCard.getExpirationDate()).build();
+        return paymentService.processPayment(creditCardInfoDto, payment);
     }
 
-    private Payment processPayment(UUID issuerUuid, Payment payment) {
-        Optional<Account> account = Optional.ofNullable(accountService.getById(issuerUuid));
-        if(account.isPresent()){
-            return paymentService.processInternalPayment(account.get(), payment);
-        } else {
-            return callPcc(payment);
-        }
-    }
-
-    private Payment callPcc(Payment payment) {
-        try {
-            // TODO: make rest call to PCC to get account from other bank
-            return makeRestCall(payment);
-        } catch (Exception ex) {
-            throw new ErrorInCommunicationException(payment.getErrorUrl());
-        }
-    }
-
-    private Payment makeRestCall(Payment payment) {
-        return new Payment();
+    public void finishPayment(Payment payment, String finishUrl) {
+        paymentService.finishPayment(payment, finishUrl);
     }
 
     public static String readQR(BufferedImage qrCode) throws NotFoundException, com.google.zxing.NotFoundException {
@@ -116,10 +100,6 @@ public class QrCodeService {
                 = new MultiFormatReader().decode(binaryBitmap);
 
         return result.getText();
-    }
-
-    public void finishPayment(Payment payment, String finishUrl) {
-        paymentService.finishPayment(payment, finishUrl);
     }
 
     public void validateQrCode(BufferedImage qrCode) throws com.google.zxing.NotFoundException, IOException {
