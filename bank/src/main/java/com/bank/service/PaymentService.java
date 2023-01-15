@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -106,6 +107,8 @@ public class PaymentService {
             PccResponse response = pccResponseService.makeRestCallToPcc(creditCardInfo, payment);
             payment.getAcquirerTransaction().setStatus(response.isSuccess() ? Status.PROCESSED : Status.FAILED);
             payment.setStatus(response.isSuccess() ? Status.PROCESSED : Status.FAILED);
+            if(response.isSuccess())
+                accountService.increaseAmount(payment.getAcquirerTransaction().getAccount(), payment.getAcquirerTransaction().getAmount());
             return paymentRepository.save(payment);
         } catch (Exception ex) {
             payment.getAcquirerTransaction().setStatus(Status.FAILED);
