@@ -7,6 +7,7 @@ import com.bank.exception.NotFoundException;
 import com.bank.model.*;
 import com.bank.repository.PaymentRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -127,8 +128,8 @@ public class PaymentService {
                 .transactionStatus(payment.getAcquirerTransaction().getStatus().toString())
                 .transactionAmount(payment.getAcquirerTransaction().getAmount()).build();
         try {
-            HttpResponse response = restTemplate.postForObject(finishUrl, paymentDto, HttpResponse.class);
-            if(response!= null && response.statusCode() != 200)
+            HttpStatus response = restTemplate.postForObject(finishUrl, paymentDto, HttpStatus.class);
+            if(response!= null && response.value() != 200)
                 finishPayment(payment, finishUrl);
         } catch (Exception ex) {
             log.error(ex.getMessage());

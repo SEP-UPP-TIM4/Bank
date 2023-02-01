@@ -16,15 +16,13 @@ import java.time.LocalDate;
 @Getter
 public class CreditCardInfoDto {
 
-    @CreditCardNumber(message="Not a valid credit card number")
+    @CreditCardNumber(message = "Credit card number is not valid")
     private String pan;
 
-    @Digits(integer=3, fraction=0, message="Invalid CVV")
+    @Digits(integer = 3, fraction = 0, message = "Invalid CVV")
     private String cvv;
 
     private String cardholderName;
 
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
     private LocalDate expirationDate;
-
 }

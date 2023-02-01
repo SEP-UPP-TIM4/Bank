@@ -4,10 +4,17 @@ import com.bank.dto.*;
 import com.bank.model.Payment;
 import com.bank.model.Status;
 import com.bank.service.PaymentService;
+import com.bank.service.TripleDes;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 @Slf4j
@@ -17,10 +24,20 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    public static final String FINISH_URL = "http://localhost:8081/CREDIT-CARD-SERVICE/api/v1/payment/finish";
+    public static final String FINISH_URL = "https://localhost:8081/CREDIT-CARD-SERVICE/api/v1/payment/finish";
 
-    public PaymentController(PaymentService paymentService) {
+    private final TripleDes tripleDes;
+
+    public PaymentController(PaymentService paymentService, TripleDes tripleDes) {
         this.paymentService = paymentService;
+        this.tripleDes = tripleDes;
+    }
+
+    @GetMapping
+    @ResponseStatus(value = HttpStatus.OK)
+    public String encrypt() {
+        String encrypted = tripleDes.encrypt("pass");
+        return tripleDes.decrypt("9bVyTZkZiSSPoMTY3+LVkoklKlCX19Qm");
     }
 
     @PostMapping("validate")
@@ -38,7 +55,7 @@ public class PaymentController {
     @CrossOrigin(origins = "http://localhost:4201")
     @PostMapping("credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RedirectDto payByCreditCard(@PathVariable UUID paymentId, @RequestBody CreditCardInfoDto requestDto) {
+    public RedirectDto payByCreditCard(@PathVariable UUID paymentId, @RequestBody @Valid CreditCardInfoDto requestDto) {
         Payment payment = paymentService.payByCreditCard(requestDto, paymentId);
         paymentService.finishPayment(payment, FINISH_URL);
         log.info("Payment with id {} successfully finished!", paymentId);

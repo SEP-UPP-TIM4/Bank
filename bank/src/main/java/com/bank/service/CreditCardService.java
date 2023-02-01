@@ -6,7 +6,6 @@ import com.bank.exception.InvalidExpirationDateException;
 import com.bank.exception.NotFoundException;
 import com.bank.exception.WrongCardholderNameException;
 import com.bank.model.CreditCard;
-import com.bank.model.Payment;
 import com.bank.repository.CreditCardRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +18,15 @@ public class CreditCardService {
 
     private final CreditCardRepository creditCardRepository;
 
-    public CreditCardService(CreditCardRepository creditCardRepository) {
+    private final TripleDes tripleDes;
+
+    public CreditCardService(CreditCardRepository creditCardRepository, TripleDes tripleDes) {
         this.creditCardRepository = creditCardRepository;
+        this.tripleDes = tripleDes;
     }
 
     public Optional<CreditCard> getCreditCard(CreditCardInfoDto creditCardInfo){
-        Optional<CreditCard> creditCard = creditCardRepository.findByPan(creditCardInfo.getPan());
+        Optional<CreditCard> creditCard = creditCardRepository.findByPan(tripleDes.encrypt(creditCardInfo.getPan()));
         if(creditCard.isEmpty()) return Optional.empty();
         if(checkCardholderName(creditCardInfo.getCardholderName(), creditCard.get().getAccount().getName())) {
             throw new WrongCardholderNameException();

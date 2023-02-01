@@ -13,12 +13,12 @@ VALUES ('8e3416d8-6b2b-4ef4-acc0-489b8a57a745', 'Address', 100000.0, 1, 'issuer'
 
 INSERT INTO credit_card(
     id, cvv, expiration_date, pan, account_id)
-VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b4', '012', '01/01/2025', '1234567891011214', '547c7ba9-fc3e-4e48-ab78-6e1ab8e220f0');
-
+VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b4', '012', '01/01/2025', '9bVyTZkZiSRq7zbCM80L2YklKlCX19Qm', '547c7ba9-fc3e-4e48-ab78-6e1ab8e220f0');
+--                                                                           4024007166390947
 INSERT INTO credit_card(
     id, cvv, expiration_date, pan, account_id)
-VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b5', '015', '01/01/2025', '1234567891011215', '8e3416d8-6b2b-4ef4-acc0-489b8a57a745');
-
+VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b5', '015', '01/01/2025', '9bVyTZkZiSSPoMTY3+LVkoklKlCX19Qm', '8e3416d8-6b2b-4ef4-acc0-489b8a57a745');
+--                                                                            4024007186929724
 -- INSERT INTO credit_card(
 --     id, cvv, expiration_date, pan, account_id)
 -- VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b6', '015', '01/01/2025', '1235567891011215', '8e3416d8-6b2b-4ef4-acc0-489b8a57a755');
