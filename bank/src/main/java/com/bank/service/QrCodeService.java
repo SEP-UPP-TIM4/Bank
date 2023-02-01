@@ -33,10 +33,13 @@ public class QrCodeService {
 
     private final CreditCardService creditCardService;
 
-    public QrCodeService(PaymentService paymentService, AccountService accountService, CreditCardService creditCardService) {
+    private final TripleDes tripleDes;
+
+    public QrCodeService(PaymentService paymentService, AccountService accountService, CreditCardService creditCardService, TripleDes tripleDes) {
         this.paymentService = paymentService;
         this.accountService = accountService;
         this.creditCardService = creditCardService;
+        this.tripleDes = tripleDes;
     }
 
     public BufferedImage generateQrCode(UUID paymentId) throws WriterException {
@@ -83,7 +86,7 @@ public class QrCodeService {
         Account account = accountService.getById(issuerUuid);
         CreditCard creditCard = creditCardService.findByAccountId(account.getId());
         CreditCardInfoDto creditCardInfoDto = CreditCardInfoDto.builder()
-                .pan(creditCard.getPan()).cvv(creditCard.getCvv()).cardholderName(account.getName())
+                .pan(tripleDes.decrypt(creditCard.getPan())).cvv(creditCard.getCvv()).cardholderName(account.getName())
                 .expirationDate(creditCard.getExpirationDate()).build();
         return paymentService.processPayment(creditCardInfoDto, payment);
     }
