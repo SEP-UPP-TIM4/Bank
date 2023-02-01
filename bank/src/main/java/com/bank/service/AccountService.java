@@ -1,7 +1,6 @@
 package com.bank.service;
 
 import com.bank.exception.BadCredentialsException;
-import com.bank.exception.NotEnoughFundsException;
 import com.bank.exception.NotFoundException;
 import com.bank.model.*;
 import com.bank.repository.AccountRepository;
@@ -26,20 +25,6 @@ public class AccountService {
     public void validateAccount(UUID merchantId, String merchantPassword) {
         Account account = accountRepository.findById(merchantId).orElseThrow(() ->new NotFoundException(Account.class.getSimpleName()));
         if(!passwordEncoder.matches(merchantPassword,account.getPassword())) throw new BadCredentialsException(merchantId.toString());
-    }
-
-    // TODO: remove this method - remove call from QRCodeService
-    public Account processInternalPayment(Account issuer, Payment payment) throws NotEnoughFundsException{
-        int compareResult = issuer.getAmount().compareTo(payment.getAcquirerTransaction().getAmount());
-        if(compareResult < 0){
-            throw new NotEnoughFundsException(payment.getFailedUrl());
-        }
-        Account acquirer = payment.getAcquirerTransaction().getAccount();
-        acquirer.setAmount(acquirer.getAmount().add(payment.getAcquirerTransaction().getAmount()));
-        accountRepository.save(acquirer);
-        payment.getAcquirerTransaction().setStatus(Status.PROCESSED);
-        issuer.setAmount(issuer.getAmount().subtract(payment.getAcquirerTransaction().getAmount()));
-        return accountRepository.save(issuer);
     }
 
     public void increaseAmount(Account account, BigDecimal amount) {

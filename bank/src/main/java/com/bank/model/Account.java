@@ -17,10 +17,10 @@ public class Account {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private UUID id;                // MERCHANT_ID
 
     @Setter
-    private String password;
+    private String password;       // MERCHANT_PASSWORD
 
     @Setter
     @Column(unique = true)
