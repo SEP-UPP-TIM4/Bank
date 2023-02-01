@@ -4,17 +4,11 @@ import com.bank.dto.*;
 import com.bank.model.Payment;
 import com.bank.model.Status;
 import com.bank.service.PaymentService;
-import com.bank.service.TripleDes;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.*;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 @Slf4j
@@ -26,18 +20,8 @@ public class PaymentController {
 
     public static final String FINISH_URL = "https://localhost:8081/CREDIT-CARD-SERVICE/api/v1/payment/finish";
 
-    private final TripleDes tripleDes;
-
-    public PaymentController(PaymentService paymentService, TripleDes tripleDes) {
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-        this.tripleDes = tripleDes;
-    }
-
-    @GetMapping
-    @ResponseStatus(value = HttpStatus.OK)
-    public String encrypt() {
-        String encrypted = tripleDes.encrypt("pass");
-        return tripleDes.decrypt("9bVyTZkZiSSPoMTY3+LVkoklKlCX19Qm");
     }
 
     @PostMapping("validate")

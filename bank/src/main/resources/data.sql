@@ -21,4 +21,5 @@ VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b5', '015', '01/01/2025', '9bVyTZkZiS
 --                                                                            4024007186929724
 -- INSERT INTO credit_card(
 --     id, cvv, expiration_date, pan, account_id)
--- VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b6', '015', '01/01/2025', '1235567891011215', '8e3416d8-6b2b-4ef4-acc0-489b8a57a755');
+-- VALUES ('a8e2f208-b667-44e7-ae3a-9d0e044658b6', '015', '01/01/2025', 'JBOW14zLzrR/uyyANsR9X4klKlCX19Qm', '8e3416d8-6b2b-4ef4-acc0-489b8a57a755');
+--                                                                            4485068972188380

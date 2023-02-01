@@ -55,19 +55,4 @@ public class AccountService {
     public Account getById(UUID merchantId) {
         return accountRepository.findById(merchantId).orElseThrow(() ->new NotFoundException(Account.class.getSimpleName()));
     }
-
-    public void makePayment(BigDecimal amount, Currency currency, Account issuer) {
-        int result = issuer.getAmount().compareTo(amount);
-        if(result < 0) {
-
-            return;
-        }
-        Transaction issuerTransaction = Transaction.builder()
-                .amount(amount)
-                .currency(currency)
-                .status(Status.PROCESSED)
-                .account(issuer)
-                .income(false)
-                .build();
-    }
 }

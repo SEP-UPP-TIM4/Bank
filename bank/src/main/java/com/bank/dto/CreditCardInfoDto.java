@@ -1,6 +1,5 @@
 package com.bank.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Digits;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

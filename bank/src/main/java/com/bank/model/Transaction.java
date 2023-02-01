@@ -2,7 +2,6 @@ package com.bank.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
