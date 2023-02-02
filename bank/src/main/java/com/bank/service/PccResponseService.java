@@ -19,7 +19,7 @@ public class PccResponseService {
 
     private final ModelMapper modelMapper;
 
-    public static final String PCC_URL = "http://localhost:9008/api/v1/pcc/forward";
+    public static final String PCC_URL = "http://" + System.getenv("ip_address") + ":9008/api/v1/pcc/forward";
 
     public PccResponseService(PccResponseRepository repository, RestTemplate restTemplate) {
         this.repository = repository;

@@ -7,6 +7,7 @@ import com.bank.exception.NotFoundException;
 import com.bank.model.*;
 import com.bank.repository.PaymentRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -26,8 +27,9 @@ public class PaymentService {
     private final RestTemplate restTemplate;
     private final PccResponseService pccResponseService;
 
-    private static final String PAYMENT_URL = "http://localhost:4201/payment";
-    private static final String QR_PAYMENT_URL = "http://localhost:4201/qr-payment";
+
+    private static final String PAYMENT_URL = "http://" + System.getenv("ip_address") + ":4201/payment";
+    private static final String QR_PAYMENT_URL = "http://" + System.getenv("ip_address") + ":4201/qr-payment";
 
     public PaymentService(TransactionService transactionService, PaymentRepository paymentRepository,
                           AccountService accountService, CreditCardService creditCardService,

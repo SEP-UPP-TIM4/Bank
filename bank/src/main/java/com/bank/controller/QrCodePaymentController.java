@@ -25,13 +25,13 @@ public class QrCodePaymentController {
 
     private final QrCodeService qrCodeService;
 
-    public static final String FINISH_URL = "http://localhost:8081/QR-CODE-SERVICE/api/v1/payment/finish";
+    public static final String FINISH_URL = "http://" + System.getenv("ip_address2") + ":8081/QR-CODE-SERVICE/api/v1/payment/finish";
 
     public QrCodePaymentController(QrCodeService qrCodeService) {
         this.qrCodeService = qrCodeService;
     }
 
-    @CrossOrigin(origins = "http://localhost:4201")
+    @CrossOrigin(origins = "*")
     @PostMapping("gen/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public String generateQr(@PathVariable UUID paymentId) throws WriterException, IOException, NotFoundException {
@@ -40,7 +40,7 @@ public class QrCodePaymentController {
         return toBase64(qrCode);
     }
 
-    @CrossOrigin(origins = "http://localhost:4201")
+    @CrossOrigin(origins = "*")
     @PostMapping("pay/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public RedirectDto processPayment(@RequestBody QrCodeDto qrCode, @PathVariable UUID paymentId) {

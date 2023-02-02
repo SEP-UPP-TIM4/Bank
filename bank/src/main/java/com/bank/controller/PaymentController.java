@@ -18,7 +18,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    public static final String FINISH_URL = "https://localhost:8081/CREDIT-CARD-SERVICE/api/v1/payment/finish";
+    public static final String FINISH_URL = "http://" + System.getenv("ip_address2") + ":8081/CREDIT-CARD-SERVICE/api/v1/payment/finish";
 
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
@@ -36,7 +36,7 @@ public class PaymentController {
         return paymentService.getPaymentUrlAndIdQr(requestDto);
     }
 
-    @CrossOrigin(origins = "http://localhost:4201")
+    @CrossOrigin(origins = "*")
     @PostMapping("credit-card/{paymentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public RedirectDto payByCreditCard(@PathVariable UUID paymentId, @RequestBody @Valid CreditCardInfoDto requestDto) {
